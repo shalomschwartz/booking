@@ -130,7 +130,7 @@ export default function App() {
         <div style={s.container}>
 
           {step !== "done" && (
-            <div style={s.pageHeader}>
+            <div style={s.pageHeader} className="ph">
               <p style={s.eyebrow}>
                 <span style={s.eyebrowDot} />
                 Schedule a session
@@ -141,7 +141,7 @@ export default function App() {
           )}
 
           {step !== "done" && (
-            <div style={s.stepperWrap}>
+            <div style={s.stepperWrap} className="sw">
               {["Choose date", "Choose time", "Your details"].map((label, i) => (
                 <div key={label} style={s.stepperItem}>
                   <div style={{
@@ -188,11 +188,11 @@ export default function App() {
             {/* DATE */}
             {step === "date" && (
               <div className="anim">
-                <div style={s.cardHeader}>
+                <div style={s.cardHeader} className="ch">
                   <h2 style={s.cardTitle}>Select a date</h2>
                   <p style={s.cardSub}>Available days over the next 2 weeks</p>
                 </div>
-                <div style={s.dayGrid}>
+                <div style={s.dayGrid} className="dg">
                   {availability.days.map((d) => {
                     const sel = selectedDate === d.date;
                     const { wk, day, mon } = fmtShort(d.date);
@@ -217,7 +217,7 @@ export default function App() {
                 {availability.days.length === 0 && (
                   <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
                 )}
-                <div style={s.cardFooter}>
+                <div style={s.cardFooter} className="cf">
                   {nudgeDate && !selectedDate && (
                     <p style={s.nudgeMsg}>Please select a date to continue</p>
                   )}
@@ -243,7 +243,7 @@ export default function App() {
             {/* TIME */}
             {step === "time" && (
               <div className="anim">
-                <div style={s.cardHeader}>
+                <div style={s.cardHeader} className="ch">
                   <button className="btn-back" style={s.btnBack} onClick={() => goTo("date")}>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -254,7 +254,7 @@ export default function App() {
                   <p style={s.cardSub}>{fmtDate(selectedDate)} · {CONFIG.SLOT_DURATION}-minute sessions</p>
                 </div>
 
-                <div style={s.timeGrid}>
+                <div style={s.timeGrid} className="tg">
                   {slotsForDate.map((sl, i) => {
                     const sel = selectedSlot?.start === sl.start;
                     return (
@@ -276,7 +276,7 @@ export default function App() {
                   })}
                 </div>
 
-                <div style={s.cardFooter}>
+                <div style={s.cardFooter} className="cf">
                   {nudgeTime && !selectedSlot && (
                     <p style={s.nudgeMsg}>Please select a time to continue</p>
                   )}
@@ -302,7 +302,7 @@ export default function App() {
             {/* DETAILS */}
             {step === "details" && (
               <div className="anim">
-                <div style={s.cardHeader}>
+                <div style={s.cardHeader} className="ch">
                   <button className="btn-back" style={s.btnBack} onClick={() => goTo("time")}>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -313,7 +313,7 @@ export default function App() {
                   <p style={s.cardSub}>Almost done — just a couple more things</p>
                 </div>
 
-                <div style={s.summaryRow}>
+                <div style={s.summaryRow} className="sr">
                   <div style={s.summaryChip}>
                     <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
                       <rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="#374151" strokeWidth="1.4"/>
@@ -330,7 +330,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div style={s.formGrid}>
+                <div style={s.formGrid} className="fg">
                   <div style={s.field}>
                     <label style={s.label}>Full name</label>
                     <input
@@ -370,7 +370,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div style={s.cardFooter}>
+                <div style={s.cardFooter} className="cf">
                   <button
                     className="btn-primary"
                     disabled={submitting}
@@ -397,7 +397,7 @@ export default function App() {
 
             {/* DONE */}
             {step === "done" && (
-              <div className="anim" style={{ padding: "52px 40px 48px", textAlign: "center" }}>
+              <div className="anim dp" style={{ padding: "52px 40px 48px", textAlign: "center" }}>
                 <div style={s.successRing}>
                   <div style={s.successCircle}>
                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -503,6 +503,21 @@ const globalStyles = `
 
   .btn-ghost-dark { transition: background 0.15s, color 0.15s !important; cursor: pointer; }
   .btn-ghost-dark:hover { background: #F3F4F6 !important; }
+
+  @media (max-width: 600px) {
+    .ph { margin-bottom: 20px !important; }
+    .ph h1 { font-size: 24px !important; }
+    .ph p { font-size: 14px !important; }
+    .sw { gap: 6px !important; margin-bottom: 18px !important; }
+    .sw span { font-size: 11px !important; }
+    .ch { padding: 22px 20px 0 !important; }
+    .cf { padding: 8px 20px 28px !important; }
+    .dg { padding: 14px 20px !important; gap: 6px !important; }
+    .tg { grid-template-columns: repeat(2, 1fr) !important; padding: 14px 20px !important; }
+    .sr { padding: 14px 20px 4px !important; }
+    .fg { grid-template-columns: 1fr !important; padding: 14px 20px 8px !important; }
+    .dp { padding: 36px 20px !important; }
+  }
 
   input:focus, textarea:focus {
     outline: none !important;
