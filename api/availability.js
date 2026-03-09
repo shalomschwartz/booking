@@ -6,52 +6,63 @@ export default async function handler(req, res) {
   try {
     const accessToken = await getAccessToken();
     const DAYS_AHEAD = 14;
-    const SLOT_DURATION = parseInt(process.env.SLOT_DURATION_MINS || '60');
+    const SLOT_DURATION = parseInt(process.env.SLOT_DURATION_MINS || '30');
     const WORK_START = parseInt(process.env.WORK_START_HOUR || '9');
     const WORK_END = parseInt(process.env.WORK_END_HOUR || '18');
     const TIMEZONE = process.env.TIMEZONE || 'Asia/Jerusalem';
     const CALENDAR_ID = process.env.CALENDAR_ID || 'primary';
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endDate = new Date(today);
-    endDate.setDate(today.getDate() + DAYS_AHEAD);
-    endDate.setHours(23, 59, 59, 999);
-
-    const freebusyResp = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        timeMin: today.toISOString(),
-        timeMax: endDate.toISOString(),
-        timeZone: TIMEZONE,
-        items: [{ id: CALENDAR_ID }],
-      }),
-    });
-
-    const freebusyData = await freebusyResp.json();
-    const busy = freebusyData.calendars?.[CALENDAR_ID]?.busy || [];
-
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
     const days = [];
+
     for (let i = 0; i < DAYS_AHEAD; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      if (date.getDay() === 0 || date.getDay() === 6) continue;
+      const dateObj = new Date(todayStr + 'T00:00:00');
+      dateObj.setDate(dateObj.getDate() + i);
+      const dateStr = dateObj.toLocaleDateString('en-CA', { timeZone: TIMEZONE }).slice(0, 10);
+
+      const jsDay = new Date(dateStr + 'T12:00:00').getDay();
+      if (jsDay === 0 || jsDay === 6) continue;
+
+      const slotStart = new Date(`${dateStr}T${String(WORK_START).padStart(2,'0')}:00:00`);
+      const slotEnd = new Date(`${dateStr}T${String(WORK_END).padStart(2,'0')}:00:00`);
+
+      const timeMin = new Date(`${dateStr}T${String(WORK_START).padStart(2,'0')}:00:00`).toLocaleString('sv-SE', { timeZone: TIMEZONE }).replace(' ', 'T') + ':00';
+      const timeMax = new Date(`${dateStr}T${String(WORK_END).padStart(2,'0')}:00:00`).toLocaleString('sv-SE', { timeZone: TIMEZONE }).replace(' ', 'T') + ':00';
+
+      const freebusyResp = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          timeMin: new Date(timeMin).toISOString(),
+          timeMax: new Date(timeMax).toISOString(),
+          timeZone: TIMEZONE,
+          items: [{ id: CALENDAR_ID }],
+        }),
+      });
+
+      const freebusyData = await freebusyResp.json();
+      const busy = freebusyData.calendars?.[CALENDAR_ID]?.busy || [];
 
       const daySlots = [];
-      const dayStart = new Date(date); dayStart.setHours(WORK_START, 0, 0, 0);
-      const dayEnd = new Date(date); dayEnd.setHours(WORK_END, 0, 0, 0);
-      let cur = new Date(dayStart);
+      let cur = new Date(`${dateStr}T${String(WORK_START).padStart(2,'0')}:00:00`);
+      const end = new Date(`${dateStr}T${String(WORK_END).padStart(2,'0')}:00:00`);
 
-      while (cur < dayEnd) {
-        const end = new Date(cur.getTime() + SLOT_DURATION * 60000);
-        if (end > dayEnd) break;
-        const isBusy = busy.some((b) => new Date(b.start) < end && new Date(b.end) > cur);
-        if (!isBusy) daySlots.push({ start: cur.toISOString(), end: end.toISOString() });
-        cur = end;
+      while (cur < end) {
+        const slotEnd = new Date(cur.getTime() + SLOT_DURATION * 60000);
+        if (slotEnd > end) break;
+
+        const curISO = cur.toLocaleString('sv-SE', { timeZone: TIMEZONE }).replace(' ', 'T');
+        const endISO = slotEnd.toLocaleString('sv-SE', { timeZone: TIMEZONE }).replace(' ', 'T');
+
+        const isBusy = busy.some((b) => new Date(b.start) < slotEnd && new Date(b.end) > cur);
+        if (!isBusy) daySlots.push({
+          start: new Date(curISO).toISOString(),
+          end: new Date(endISO).toISOString(),
+        });
+        cur = slotEnd;
       }
 
-      if (daySlots.length > 0) days.push({ date: date.toISOString().split('T')[0], slots: daySlots });
+      if (daySlots.length > 0) days.push({ date: dateStr, slots: daySlots });
     }
 
     return res.status(200).json({ days, timezone: TIMEZONE });
