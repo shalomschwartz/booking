@@ -49,7 +49,7 @@ export default async function handler(req, res) {
     const created = await calResp.json();
     const meetLink = created.conferenceData?.entryPoints?.find(e => e.entryPointType === 'video')?.uri || null;
 
-    await sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration: SLOT_DURATION, businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
+    await sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
 
     return res.status(200).json({ success: true, eventId: created.id, meetLink });
   } catch (err) {
