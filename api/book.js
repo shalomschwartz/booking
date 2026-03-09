@@ -57,10 +57,11 @@ export default async function handler(req, res) {
 }
 
 async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration, businessName }) {
+  const tz = process.env.TIMEZONE || 'Asia/Jerusalem';
   const startDate = new Date(start);
   const endDate = new Date(end);
-  const dateStr = startDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-  const timeStr = `${startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })} – ${endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+  const dateStr = startDate.toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  const timeStr = `${startDate.toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false })} - ${endDate.toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false })}`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
