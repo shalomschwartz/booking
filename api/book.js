@@ -64,21 +64,3 @@ async function getAccessToken() {
   if (!data.access_token) throw new Error('Failed to get access token');
   return data.access_token;
 }
-```
-
----
-
-That's all 8 files. Your folder structure in GitHub should look like:
-```
-booking/
-├── api/
-│   ├── auth.js
-│   ├── availability.js
-│   └── book.js
-├── src/
-│   ├── App.jsx
-│   └── main.jsx
-├── index.html
-├── package.json
-├── vercel.json
-└── vite.config.js
