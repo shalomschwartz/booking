@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       const dateStr = dateObj.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
 
       const jsDay = new Date(dateStr + 'T12:00:00').getDay();
-      if (jsDay === 0 || jsDay === 6) continue;
+      if (jsDay === 5 || jsDay === 6) continue;
 
       const toUTC = (localDateStr, hour) => {
         const d = new Date(`${localDateStr}T${String(hour).padStart(2,'0')}:00:00`);
