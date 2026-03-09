@@ -94,6 +94,7 @@ export default function App() {
 
   if (loading) return (
     <div style={s.page}>
+      <style>{globalStyles}</style>
       <Nav />
       <div style={s.loadWrap}>
         <div style={s.spinnerRing} />
@@ -104,10 +105,15 @@ export default function App() {
 
   if (error) return (
     <div style={s.page}>
+      <style>{globalStyles}</style>
       <Nav />
       <div style={s.centerWrap}>
         <div style={s.errorCard}>
-          <div style={s.errorIcon}>!</div>
+          <div style={s.errorIcon}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#DC2626" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
           <h3 style={s.errorTitle}>Scheduling Unavailable</h3>
           <p style={s.errorSub}>Please contact us directly to book an appointment.</p>
         </div>
@@ -117,39 +123,7 @@ export default function App() {
 
   return (
     <div style={s.page}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #f0f2f7; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes scaleUp { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
-        @keyframes nudge { 0%{transform:scale(1)} 30%{transform:scale(1.02)} 60%{transform:scale(0.98)} 100%{transform:scale(1)} }
-        .anim { animation: fadeUp 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
-        .anim-scale { animation: scaleUp 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
-        .nudge { animation: nudge 0.35s ease; }
-
-        .day-card { transition: all 0.18s ease !important; cursor: pointer; }
-        .day-card:hover { border-color: #2563eb !important; background: #eff6ff !important; transform: translateY(-3px) !important; box-shadow: 0 8px 20px rgba(37,99,235,0.15) !important; }
-        .day-card:hover span { color: #2563eb !important; }
-
-        .slot-pill { transition: all 0.15s ease !important; cursor: pointer; }
-        .slot-pill:hover:not(.slot-selected) { border-color: #2563eb !important; color: #2563eb !important; background: #eff6ff !important; transform: translateY(-1px) !important; box-shadow: 0 4px 12px rgba(37,99,235,0.12) !important; }
-
-        .btn-primary { transition: all 0.18s ease !important; cursor: pointer; }
-        .btn-primary:hover:not(:disabled) { background: #1d4ed8 !important; transform: translateY(-1px) !important; box-shadow: 0 10px 28px rgba(37,99,235,0.4) !important; color: #fff !important; }
-        .btn-primary:active:not(:disabled) { transform: translateY(0) !important; }
-
-        .btn-ghost { transition: all 0.15s ease !important; }
-        .btn-ghost:hover { color: #1e293b !important; background: #f1f5f9 !important; }
-
-        .btn-secondary { transition: all 0.18s ease !important; cursor: pointer; }
-        .btn-secondary:hover { background: #e8ecf5 !important; color: #1e293b !important; }
-
-        input:focus, textarea:focus { outline: none !important; border-color: #2563eb !important; box-shadow: 0 0 0 4px rgba(37,99,235,0.1) !important; background: #fff !important; }
-        input::placeholder, textarea::placeholder { color: #c0c8d8; }
-      `}</style>
-
+      <style>{globalStyles}</style>
       <Nav />
 
       <main style={s.main}>
@@ -157,64 +131,85 @@ export default function App() {
 
           {step !== "done" && (
             <div style={s.pageHeader}>
-              <p style={s.eyebrow}>Schedule a session</p>
+              <p style={s.eyebrow}>
+                <span style={s.eyebrowDot} />
+                Schedule a session
+              </p>
               <h1 style={s.pageTitle}>Book an Appointment</h1>
-              <p style={s.pageSub}>{CONFIG.SLOT_DURATION}-minute session · Video call via Google Meet</p>
+              <p style={s.pageSub}>{CONFIG.SLOT_DURATION}-minute session via Google Meet</p>
             </div>
           )}
 
           {step !== "done" && (
-            <div style={s.progressWrap}>
+            <div style={s.stepperWrap}>
               {["Choose date", "Choose time", "Your details"].map((label, i) => (
-                <div key={label} style={s.progressItem}>
+                <div key={label} style={s.stepperItem}>
                   <div style={{
-                    ...s.progressDot,
-                    background: stepNum > i ? "#2563eb" : stepNum === i ? "#fff" : "#e8ecf5",
-                    border: `2px solid ${stepNum >= i ? "#2563eb" : "#dde2ef"}`,
-                    color: stepNum > i ? "#fff" : stepNum === i ? "#2563eb" : "#aab0c4",
-                    boxShadow: stepNum === i ? "0 0 0 5px rgba(37,99,235,0.1)" : "none",
+                    ...s.stepperCircle,
+                    background: stepNum > i ? "#111827" : stepNum === i ? "#111827" : "transparent",
+                    border: `2px solid ${stepNum >= i ? "#111827" : "#D1D5DB"}`,
+                    color: stepNum >= i ? "#fff" : "#9CA3AF",
                   }}>
                     {stepNum > i ? (
-                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                        <path d="M2 5.5l2.5 2.5L9 3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2.5 6l2.5 2.5L9.5 3.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     ) : i + 1}
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: stepNum === i ? 600 : 400, color: stepNum >= i ? "#1e293b" : "#aab0c4" }}>
+                  <span style={{
+                    fontSize: 13,
+                    fontWeight: stepNum === i ? 600 : 400,
+                    color: stepNum >= i ? "#111827" : "#9CA3AF",
+                    whiteSpace: "nowrap",
+                  }}>
                     {label}
                   </span>
-                  {i < 2 && <div style={{ flex: 1, height: 2, background: stepNum > i ? "#2563eb" : "#dde2ef", borderRadius: 1, minWidth: 32, maxWidth: 64 }} />}
+                  {i < 2 && (
+                    <div style={{
+                      flex: 1,
+                      height: 1,
+                      background: stepNum > i ? "#111827" : "#E5E7EB",
+                      minWidth: 24,
+                      maxWidth: 56,
+                    }} />
+                  )}
                 </div>
               ))}
             </div>
           )}
 
-          <div style={{ ...s.card, opacity: animating ? 0 : 1, transform: animating ? "translateY(10px)" : "translateY(0)", transition: "opacity 0.22s, transform 0.22s" }}>
+          <div style={{
+            ...s.card,
+            opacity: animating ? 0 : 1,
+            transform: animating ? "translateY(8px)" : "translateY(0)",
+            transition: "opacity 0.22s ease, transform 0.22s ease",
+          }}>
 
             {/* DATE */}
             {step === "date" && (
               <div className="anim">
-                <div style={s.sectionHead}>
-                  <h2 style={s.sectionTitle}>Select a date</h2>
-                  <p style={s.sectionSub}>Available days over the next 2 weeks</p>
+                <div style={s.cardHeader}>
+                  <h2 style={s.cardTitle}>Select a date</h2>
+                  <p style={s.cardSub}>Available days over the next 2 weeks</p>
                 </div>
                 <div style={s.dayGrid}>
                   {availability.days.map((d) => {
                     const sel = selectedDate === d.date;
                     const { wk, day, mon } = fmtShort(d.date);
                     return (
-                      <div key={d.date} className="day-card"
+                      <div
+                        key={d.date}
+                        className={`day-card${sel ? " day-selected" : ""}`}
                         onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); setNudgeDate(false); }}
                         style={{
                           ...s.dayCard,
-                          background: sel ? "#2563eb" : "#fff",
-                          border: `2px solid ${sel ? "#2563eb" : "#e4e9f2"}`,
-                          boxShadow: sel ? "0 8px 24px rgba(37,99,235,0.28)" : "0 2px 8px rgba(0,0,0,0.04)",
-                          transform: sel ? "translateY(-3px)" : "none",
-                        }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.8px", color: sel ? "rgba(255,255,255,0.75)" : "#8896b0" }}>{wk}</span>
-                        <span style={{ fontSize: 26, fontWeight: 700, color: sel ? "#fff" : "#1e293b", lineHeight: 1 }}>{day}</span>
-                        <span style={{ fontSize: 11, fontWeight: 500, color: sel ? "rgba(255,255,255,0.75)" : "#8896b0" }}>{mon}</span>
+                          background: sel ? "#111827" : "#fff",
+                          border: `1.5px solid ${sel ? "#111827" : "#E5E7EB"}`,
+                        }}
+                      >
+                        <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1px", color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{wk}</span>
+                        <span style={{ fontSize: 24, fontWeight: 700, color: sel ? "#fff" : "#111827", lineHeight: 1.1 }}>{day}</span>
+                        <span style={{ fontSize: 10, fontWeight: 500, color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{mon}</span>
                       </div>
                     );
                   })}
@@ -222,9 +217,9 @@ export default function App() {
                 {availability.days.length === 0 && (
                   <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
                 )}
-                <div style={s.btnWrap}>
+                <div style={s.cardFooter}>
                   {nudgeDate && !selectedDate && (
-                    <p style={s.nudgeMsg}>👆 Please pick a date first</p>
+                    <p style={s.nudgeMsg}>Please select a date to continue</p>
                   )}
                   <div
                     onMouseEnter={() => { if (!selectedDate) setNudgeDate(true); }}
@@ -232,10 +227,13 @@ export default function App() {
                   >
                     <button
                       className="btn-primary"
-                      style={{ ...s.btnPrimary, opacity: selectedDate ? 1 : 0.45 }}
+                      style={{ ...s.btnPrimary, opacity: selectedDate ? 1 : 0.35 }}
                       onClick={() => { if (!selectedDate) { setNudgeDate(true); return; } goTo("time"); }}
                     >
-                      Continue →
+                      Continue
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 8 }}>
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -245,38 +243,42 @@ export default function App() {
             {/* TIME */}
             {step === "time" && (
               <div className="anim">
-                <div style={s.sectionHead}>
-                  <button className="btn-ghost" style={s.btnBack} onClick={() => goTo("date")}>
-                    ← Back
+                <div style={s.cardHeader}>
+                  <button className="btn-back" style={s.btnBack} onClick={() => goTo("date")}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Back
                   </button>
-                  <h2 style={s.sectionTitle}>Select a time</h2>
-                  <p style={s.sectionSub}>{fmtDate(selectedDate)} · {CONFIG.SLOT_DURATION}-minute sessions</p>
+                  <h2 style={s.cardTitle}>Select a time</h2>
+                  <p style={s.cardSub}>{fmtDate(selectedDate)} · {CONFIG.SLOT_DURATION}-minute sessions</p>
                 </div>
 
                 <div style={s.timeGrid}>
                   {slotsForDate.map((sl, i) => {
                     const sel = selectedSlot?.start === sl.start;
                     return (
-                      <div key={i}
+                      <div
+                        key={i}
                         className={`slot-pill${sel ? " slot-selected" : ""}`}
                         onClick={() => { setSelectedSlot(sl); setNudgeTime(false); }}
                         style={{
                           ...s.slotPill,
-                          background: sel ? "#2563eb" : "#f8fafc",
-                          color: sel ? "#fff" : "#1e293b",
-                          border: `2px solid ${sel ? "#2563eb" : "#e4e9f2"}`,
-                          boxShadow: sel ? "0 4px 16px rgba(37,99,235,0.25)" : "none",
+                          background: sel ? "#111827" : "#F9FAFB",
+                          color: sel ? "#fff" : "#374151",
+                          border: `1.5px solid ${sel ? "#111827" : "#E5E7EB"}`,
                           fontWeight: sel ? 600 : 500,
-                        }}>
+                        }}
+                      >
                         {fmtRange(sl.start, sl.end)}
                       </div>
                     );
                   })}
                 </div>
 
-                <div style={s.btnWrap}>
+                <div style={s.cardFooter}>
                   {nudgeTime && !selectedSlot && (
-                    <p style={s.nudgeMsg}>👆 Please pick a time first</p>
+                    <p style={s.nudgeMsg}>Please select a time to continue</p>
                   )}
                   <div
                     onMouseEnter={() => { if (!selectedSlot) setNudgeTime(true); }}
@@ -284,10 +286,13 @@ export default function App() {
                   >
                     <button
                       className="btn-primary"
-                      style={{ ...s.btnPrimary, opacity: selectedSlot ? 1 : 0.45 }}
+                      style={{ ...s.btnPrimary, opacity: selectedSlot ? 1 : 0.35 }}
                       onClick={() => { if (!selectedSlot) { setNudgeTime(true); return; } goTo("details"); }}
                     >
-                      Continue →
+                      Continue
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 8 }}>
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -297,19 +302,30 @@ export default function App() {
             {/* DETAILS */}
             {step === "details" && (
               <div className="anim">
-                <div style={s.sectionHead}>
-                  <button className="btn-ghost" style={s.btnBack} onClick={() => goTo("time")}>← Back</button>
-                  <h2 style={s.sectionTitle}>Your details</h2>
-                  <p style={s.sectionSub}>Almost done — just a couple more things</p>
+                <div style={s.cardHeader}>
+                  <button className="btn-back" style={s.btnBack} onClick={() => goTo("time")}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Back
+                  </button>
+                  <h2 style={s.cardTitle}>Your details</h2>
+                  <p style={s.cardSub}>Almost done — just a couple more things</p>
                 </div>
 
                 <div style={s.summaryRow}>
                   <div style={s.summaryChip}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="#2563eb" strokeWidth="1.5"/><path d="M4.5 1.5v2M9.5 1.5v2M1.5 5.5h11" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                      <rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="#374151" strokeWidth="1.4"/>
+                      <path d="M4.5 1.5v2M9.5 1.5v2M1.5 5.5h11" stroke="#374151" strokeWidth="1.4" strokeLinecap="round"/>
+                    </svg>
                     {fmtDate(selectedDate)}
                   </div>
                   <div style={s.summaryChip}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#2563eb" strokeWidth="1.5"/><path d="M7 4v3l2 1.5" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                      <circle cx="7" cy="7" r="5.5" stroke="#374151" strokeWidth="1.4"/>
+                      <path d="M7 4v3l2 1.5" stroke="#374151" strokeWidth="1.4" strokeLinecap="round"/>
+                    </svg>
                     {fmtRange(selectedSlot.start, selectedSlot.end)} · {CONFIG.SLOT_DURATION} min
                   </div>
                 </div>
@@ -317,43 +333,63 @@ export default function App() {
                 <div style={s.formGrid}>
                   <div style={s.field}>
                     <label style={s.label}>Full name</label>
-                    <input style={{ ...s.input, ...(formErrors.name ? s.inputErr : {}) }}
-                      placeholder="Jane Smith" value={form.name} autoFocus
-                      onChange={(e) => { setForm(f => ({ ...f, name: e.target.value })); setFormErrors(fe => ({ ...fe, name: undefined })); }} />
+                    <input
+                      style={{ ...s.input, ...(formErrors.name ? s.inputErr : {}) }}
+                      placeholder="Jane Smith"
+                      value={form.name}
+                      autoFocus
+                      onChange={(e) => { setForm(f => ({ ...f, name: e.target.value })); setFormErrors(fe => ({ ...fe, name: undefined })); }}
+                    />
                     {formErrors.name && <p style={s.errMsg}>{formErrors.name}</p>}
                   </div>
                   <div style={s.field}>
                     <label style={s.label}>Email address</label>
-                    <input style={{ ...s.input, ...(formErrors.email ? s.inputErr : {}) }}
-                      type="email" placeholder="jane@company.com" value={form.email}
-                      onChange={(e) => { setForm(f => ({ ...f, email: e.target.value })); setFormErrors(fe => ({ ...fe, email: undefined })); }} />
+                    <input
+                      style={{ ...s.input, ...(formErrors.email ? s.inputErr : {}) }}
+                      type="email"
+                      placeholder="jane@company.com"
+                      value={form.email}
+                      onChange={(e) => { setForm(f => ({ ...f, email: e.target.value })); setFormErrors(fe => ({ ...fe, email: undefined })); }}
+                    />
                     {formErrors.email
                       ? <p style={s.errMsg}>{formErrors.email}</p>
-                      : <p style={s.inputHint}>Confirmation email will be sent here</p>
+                      : <p style={s.inputHint}>Confirmation sent here</p>
                     }
                   </div>
                   <div style={{ ...s.field, gridColumn: "1 / -1" }}>
-                    <label style={s.label}>Notes <span style={{ color: "#b0b8c8", fontWeight: 400 }}>(optional)</span></label>
-                    <textarea style={{ ...s.input, minHeight: 96, resize: "none" }}
+                    <label style={s.label}>
+                      Notes
+                      <span style={{ color: "#9CA3AF", fontWeight: 400, marginLeft: 6 }}>optional</span>
+                    </label>
+                    <textarea
+                      style={{ ...s.input, minHeight: 100, resize: "none" }}
                       placeholder="Topics to discuss, questions, or anything helpful to know beforehand…"
                       value={form.notes}
-                      onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))} />
+                      onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))}
+                    />
                   </div>
                 </div>
 
-                <div style={s.btnWrap}>
-                  <button className="btn-primary" disabled={submitting}
+                <div style={s.cardFooter}>
+                  <button
+                    className="btn-primary"
+                    disabled={submitting}
                     style={{ ...s.btnPrimary, opacity: submitting ? 0.7 : 1 }}
-                    onClick={submitBooking}>
+                    onClick={submitBooking}
+                  >
                     {submitting ? (
                       <span style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
-                        <span style={{ width: 18, height: 18, border: "2.5px solid rgba(255,255,255,0.3)", borderTop: "2.5px solid #fff", borderRadius: "50%", animation: "spin 0.7s linear infinite", display: "inline-block" }} />
+                        <span style={s.btnSpinner} />
                         Confirming…
                       </span>
                     ) : "Confirm booking"}
                   </button>
-                  <p style={{ textAlign: "center", fontSize: 13, color: "#aab0c4", marginTop: 4 }}>
-                    🔒 Your information is secure and never shared
+                  <p style={s.secureNote}>
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+                      <rect x="2" y="6" width="10" height="7" rx="2" stroke="#9CA3AF" strokeWidth="1.4"/>
+                      <path d="M4.5 6V4.5a2.5 2.5 0 015 0V6" stroke="#9CA3AF" strokeWidth="1.4" strokeLinecap="round"/>
+                    </svg>
+                    Your information is secure and never shared
                   </p>
                 </div>
               </div>
@@ -361,16 +397,19 @@ export default function App() {
 
             {/* DONE */}
             {step === "done" && (
-              <div className="anim" style={{ textAlign: "center", padding: "8px 0" }}>
-                <div style={s.successCircle}>
-                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-                    <path d="M9 18l6 6L27 12" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+              <div className="anim" style={{ padding: "52px 40px 48px", textAlign: "center" }}>
+                <div style={s.successRing}>
+                  <div style={s.successCircle}>
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                      <path d="M7 14l5 5L21 9" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
                 </div>
-                <h2 style={{ fontSize: 30, fontWeight: 700, color: "#0f172a", marginBottom: 10, fontFamily: "'DM Serif Display', serif" }}>Booking confirmed!</h2>
-                <p style={{ fontSize: 17, color: "#64748b", marginBottom: 36, lineHeight: 1.6 }}>
-                  We look forward to speaking with you.
+                <h2 style={s.doneTitle}>You're booked!</h2>
+                <p style={s.doneSub}>
+                  Looking forward to speaking with you on <strong>{fmtDate(selectedDate)}</strong>.
                 </p>
+
                 <div style={s.confirmCard} className="anim-scale">
                   <div style={s.confirmCardHeader}>Appointment Summary</div>
                   {[
@@ -387,25 +426,31 @@ export default function App() {
                   {booking?.meetLink && (
                     <div style={{ ...s.confirmRow, borderBottom: "none" }}>
                       <span style={s.confirmLabel}>Meeting link</span>
-                      <a href={booking.meetLink} target="_blank" rel="noreferrer" style={{ fontSize: 15, fontWeight: 600, color: "#2563eb", textDecoration: "none" }}>
+                      <a href={booking.meetLink} target="_blank" rel="noreferrer" style={s.meetLink}>
                         Join Google Meet →
                       </a>
                     </div>
                   )}
                 </div>
+
                 <div style={s.emailBanner}>
-                  ✉️ &nbsp; A confirmation email has been sent to <strong>{form.email}</strong>
+                  A confirmation email has been sent to <strong>{form.email}</strong>
                 </div>
-                <button className="btn-secondary" style={s.btnSecondary}
-                  onClick={() => { setStep("date"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}>
+
+                <button
+                  className="btn-ghost-dark"
+                  style={s.btnGhostDark}
+                  onClick={() => { setStep("date"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}
+                >
                   Schedule another appointment
                 </button>
               </div>
             )}
+
           </div>
 
-          <p style={{ textAlign: "center", fontSize: 13, color: "#aab0c4", marginTop: 24 }}>
-            © {new Date().getFullYear()} {CONFIG.BUSINESS_NAME} · Secure scheduling
+          <p style={s.footer}>
+            © {new Date().getFullYear()} {CONFIG.BUSINESS_NAME}
           </p>
         </div>
       </main>
@@ -415,70 +460,133 @@ export default function App() {
 
 function Nav() {
   return (
-    <header style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e8ecf5" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 68, display: "flex", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #2563eb, #1d4ed8)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M9 2l2.5 5h5.5l-4.5 3.5 1.5 5.5L9 13l-4.5 3 1.5-5.5L1.5 7H7z" fill="#fff"/>
+    <header style={s.nav}>
+      <div style={s.navInner}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={s.navLogo}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1.5L10 6h4.5L11 9l1.5 5L8 11.5 4.5 14 6 9 2.5 6H7z" fill="#fff"/>
             </svg>
           </div>
-          <span style={{ fontSize: 17, fontWeight: 700, color: "#0f172a", fontFamily: "'DM Sans', sans-serif", letterSpacing: "-0.3px" }}>
-            {CONFIG.BUSINESS_NAME}
-          </span>
+          <span style={s.navBrand}>{CONFIG.BUSINESS_NAME}</span>
         </div>
       </div>
     </header>
   );
 }
 
+const globalStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F3F4F6; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes scaleUp { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:scale(1); } }
+  @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 1; } 70% { transform: scale(1.15); opacity: 0; } 100% { transform: scale(1.15); opacity: 0; } }
+
+  .anim { animation: fadeUp 0.28s cubic-bezier(0.22,1,0.36,1) forwards; }
+  .anim-scale { animation: scaleUp 0.32s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+  .day-card { transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s !important; cursor: pointer; }
+  .day-card:not(.day-selected):hover { border-color: #6B7280 !important; transform: translateY(-2px) !important; box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important; }
+
+  .slot-pill { transition: border-color 0.15s, background 0.15s, transform 0.12s, box-shadow 0.15s !important; cursor: pointer; }
+  .slot-pill:not(.slot-selected):hover { border-color: #6B7280 !important; background: #F3F4F6 !important; transform: translateY(-1px) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.07) !important; }
+
+  .btn-primary { transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s !important; cursor: pointer; }
+  .btn-primary:hover:not(:disabled) { opacity: 0.88 !important; transform: translateY(-1px) !important; box-shadow: 0 8px 24px rgba(17,24,39,0.28) !important; }
+  .btn-primary:active:not(:disabled) { transform: translateY(0) !important; }
+
+  .btn-back { transition: color 0.12s, background 0.12s !important; cursor: pointer; }
+  .btn-back:hover { color: #111827 !important; background: #F3F4F6 !important; }
+
+  .btn-ghost-dark { transition: background 0.15s, color 0.15s !important; cursor: pointer; }
+  .btn-ghost-dark:hover { background: #F3F4F6 !important; }
+
+  input:focus, textarea:focus {
+    outline: none !important;
+    border-color: #111827 !important;
+    box-shadow: 0 0 0 3px rgba(17,24,39,0.08) !important;
+    background: #fff !important;
+  }
+  input::placeholder, textarea::placeholder { color: #D1D5DB; }
+`;
+
 const s = {
-  page: { minHeight: "100vh", background: "#f0f2f7", fontFamily: "'DM Sans', sans-serif" },
-  main: { padding: "48px 16px 80px" },
-  container: { maxWidth: 660, margin: "0 auto" },
+  page: { minHeight: "100vh", background: "#F3F4F6", fontFamily: "'Inter', sans-serif" },
+  nav: { position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)", borderBottom: "1px solid #E5E7EB" },
+  navInner: { maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center" },
+  navLogo: { width: 32, height: 32, borderRadius: 8, background: "#111827", display: "flex", alignItems: "center", justifyContent: "center" },
+  navBrand: { fontSize: 15, fontWeight: 600, color: "#111827", letterSpacing: "-0.2px" },
+
+  main: { padding: "52px 16px 80px" },
+  container: { maxWidth: 600, margin: "0 auto" },
+
   loadWrap: { display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 120, gap: 16 },
-  spinnerRing: { width: 40, height: 40, border: "3px solid #dde2ef", borderTop: "3px solid #2563eb", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
-  loadText: { fontSize: 16, color: "#8896b0", fontWeight: 500 },
+  spinnerRing: { width: 36, height: 36, border: "2.5px solid #E5E7EB", borderTop: "2.5px solid #111827", borderRadius: "50%", animation: "spin 0.75s linear infinite" },
+  loadText: { fontSize: 15, color: "#6B7280", fontWeight: 500 },
+
   centerWrap: { display: "flex", justifyContent: "center", paddingTop: 80 },
-  errorCard: { background: "#fff", borderRadius: 20, padding: "56px 48px", textAlign: "center", boxShadow: "0 4px 32px rgba(0,0,0,0.08)", maxWidth: 420 },
-  errorIcon: { width: 56, height: 56, borderRadius: "50%", background: "#fef2f2", color: "#ef4444", fontSize: 24, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" },
-  errorTitle: { fontSize: 20, fontWeight: 700, color: "#0f172a", marginBottom: 10 },
-  errorSub: { fontSize: 15, color: "#64748b", lineHeight: 1.7 },
-  pageHeader: { textAlign: "center", marginBottom: 36 },
-  eyebrow: { fontSize: 13, fontWeight: 600, color: "#2563eb", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 10 },
-  pageTitle: { fontSize: 38, fontWeight: 700, color: "#0f172a", fontFamily: "'DM Serif Display', serif", letterSpacing: "-0.5px", marginBottom: 10 },
-  pageSub: { fontSize: 16, color: "#64748b", fontWeight: 400 },
-  progressWrap: { display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 32, flexWrap: "wrap" },
-  progressItem: { display: "flex", alignItems: "center", gap: 10 },
-  progressDot: { width: 32, height: 32, borderRadius: "50%", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" },
-  card: { background: "#fff", borderRadius: 24, boxShadow: "0 4px 40px rgba(0,0,0,0.07)", overflow: "hidden" },
-  sectionHead: { padding: "36px 36px 0" },
-  sectionTitle: { fontSize: 22, fontWeight: 700, color: "#0f172a", marginBottom: 6, letterSpacing: "-0.3px" },
-  sectionSub: { fontSize: 15, color: "#64748b", fontWeight: 400, lineHeight: 1.5 },
-  dayGrid: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, padding: "28px 36px" },
-  dayCard: { display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 6px", borderRadius: 14, gap: 5 },
-  timeGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, padding: "28px 36px" },
-  slotPill: { padding: "16px 10px", borderRadius: 12, fontSize: 15, textAlign: "center", letterSpacing: "0.2px" },
-  summaryRow: { display: "flex", gap: 10, padding: "20px 36px", flexWrap: "wrap" },
-  summaryChip: { display: "inline-flex", alignItems: "center", gap: 7, background: "#eff6ff", color: "#2563eb", borderRadius: 10, padding: "9px 14px", fontSize: 14, fontWeight: 600 },
-  formGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, padding: "4px 36px 8px" },
-  field: { display: "flex", flexDirection: "column", gap: 7 },
-  label: { fontSize: 13, fontWeight: 600, color: "#374151", letterSpacing: "0.2px" },
-  input: { padding: "13px 16px", background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: 12, color: "#0f172a", fontSize: 15, fontFamily: "'DM Sans', sans-serif", fontWeight: 400, transition: "all 0.15s" },
-  inputErr: { borderColor: "#ef4444", background: "#fff8f8" },
-  errMsg: { fontSize: 13, color: "#ef4444", fontWeight: 500 },
-  inputHint: { fontSize: 13, color: "#94a3b8" },
-  btnWrap: { padding: "8px 36px 36px", display: "flex", flexDirection: "column", gap: 10 },
-  btnPrimary: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "16px 24px", background: "#2563eb", color: "#fff", border: "none", borderRadius: 12, fontSize: 16, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", boxShadow: "0 4px 20px rgba(37,99,235,0.25)", letterSpacing: "0.1px" },
-  btnSecondary: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "16px 24px", background: "#f1f5f9", color: "#1e293b", border: "1.5px solid #e2e8f0", borderRadius: 12, fontSize: 16, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", boxShadow: "none", letterSpacing: "0.1px" },
-  btnBack: { background: "#f1f5f9", border: "1.5px solid #e2e8f0", color: "#475569", fontSize: 14, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", padding: "8px 16px", borderRadius: 8, marginBottom: 20, display: "inline-flex", alignItems: "center", cursor: "pointer" },
-  nudgeMsg: { fontSize: 14, color: "#f59e0b", fontWeight: 600, textAlign: "center", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "10px 16px" },
-  successCircle: { width: 80, height: 80, borderRadius: "50%", background: "linear-gradient(135deg, #2563eb, #1d4ed8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", boxShadow: "0 16px 40px rgba(37,99,235,0.35)" },
-  confirmCard: { background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: 16, overflow: "hidden", marginBottom: 20, textAlign: "left" },
-  confirmCardHeader: { background: "#f1f5f9", padding: "14px 24px", fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "1px" },
-  confirmRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "15px 24px", borderBottom: "1px solid #e8ecf5" },
-  confirmLabel: { fontSize: 14, color: "#64748b", fontWeight: 500 },
-  confirmVal: { fontSize: 15, color: "#0f172a", fontWeight: 600, textAlign: "right", maxWidth: "60%" },
-  emailBanner: { background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 12, padding: "14px 20px", marginBottom: 24, fontSize: 14, color: "#1d4ed8", fontWeight: 500, lineHeight: 1.6 },
-  emptyBox: { background: "#f8fafc", border: "1.5px dashed #dde2ef", borderRadius: 14, padding: "32px", fontSize: 15, color: "#8896b0", textAlign: "center", margin: "0 36px 28px", lineHeight: 1.7 },
+  errorCard: { background: "#fff", borderRadius: 20, padding: "52px 44px", textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.06)", maxWidth: 400 },
+  errorIcon: { width: 52, height: 52, borderRadius: "50%", background: "#FEF2F2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" },
+  errorTitle: { fontSize: 19, fontWeight: 700, color: "#111827", marginBottom: 10 },
+  errorSub: { fontSize: 15, color: "#6B7280", lineHeight: 1.7 },
+
+  pageHeader: { textAlign: "center", marginBottom: 32 },
+  eyebrow: { display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: 14 },
+  eyebrowDot: { width: 6, height: 6, borderRadius: "50%", background: "#22C55E", display: "inline-block" },
+  pageTitle: { fontSize: 34, fontWeight: 700, color: "#111827", letterSpacing: "-0.7px", marginBottom: 10, lineHeight: 1.15 },
+  pageSub: { fontSize: 15, color: "#6B7280", fontWeight: 400 },
+
+  stepperWrap: { display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 28, flexWrap: "wrap" },
+  stepperItem: { display: "flex", alignItems: "center", gap: 10 },
+  stepperCircle: { width: 28, height: 28, borderRadius: "50%", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" },
+
+  card: { background: "#fff", borderRadius: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 8px 40px rgba(0,0,0,0.06)", overflow: "hidden" },
+  cardHeader: { padding: "36px 36px 0" },
+  cardTitle: { fontSize: 20, fontWeight: 700, color: "#111827", marginBottom: 4, letterSpacing: "-0.3px" },
+  cardSub: { fontSize: 14, color: "#6B7280", fontWeight: 400, lineHeight: 1.5 },
+  cardFooter: { padding: "8px 36px 36px", display: "flex", flexDirection: "column", gap: 12 },
+
+  dayGrid: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, padding: "24px 36px" },
+  dayCard: { display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 6px", borderRadius: 12, gap: 4 },
+
+  timeGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, padding: "24px 36px" },
+  slotPill: { padding: "14px 10px", borderRadius: 10, fontSize: 14, textAlign: "center", letterSpacing: "0.1px" },
+
+  summaryRow: { display: "flex", gap: 8, padding: "20px 36px 4px", flexWrap: "wrap" },
+  summaryChip: { display: "inline-flex", alignItems: "center", gap: 6, background: "#F9FAFB", color: "#374151", border: "1px solid #E5E7EB", borderRadius: 8, padding: "8px 13px", fontSize: 13, fontWeight: 500 },
+
+  formGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: "16px 36px 8px" },
+  field: { display: "flex", flexDirection: "column", gap: 6 },
+  label: { fontSize: 13, fontWeight: 600, color: "#374151" },
+  input: { padding: "12px 14px", background: "#F9FAFB", border: "1.5px solid #E5E7EB", borderRadius: 10, color: "#111827", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 400, transition: "all 0.15s" },
+  inputErr: { borderColor: "#EF4444", background: "#FFF8F8" },
+  errMsg: { fontSize: 12, color: "#EF4444", fontWeight: 500 },
+  inputHint: { fontSize: 12, color: "#9CA3AF" },
+
+  btnPrimary: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "15px 24px", background: "#111827", color: "#fff", border: "none", borderRadius: 10, fontSize: 15, fontWeight: 600, fontFamily: "'Inter', sans-serif", boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 4px 16px rgba(17,24,39,0.16)", letterSpacing: "-0.1px" },
+  btnSpinner: { width: 16, height: 16, border: "2px solid rgba(255,255,255,0.3)", borderTop: "2px solid #fff", borderRadius: "50%", animation: "spin 0.65s linear infinite", display: "inline-block" },
+  btnBack: { background: "transparent", border: "none", color: "#6B7280", fontSize: 13, fontWeight: 500, fontFamily: "'Inter', sans-serif", padding: "6px 10px 6px 6px", borderRadius: 6, marginBottom: 18, display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer" },
+  btnGhostDark: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "14px 24px", background: "transparent", color: "#374151", border: "1.5px solid #E5E7EB", borderRadius: 10, fontSize: 14, fontWeight: 600, fontFamily: "'Inter', sans-serif" },
+
+  secureNote: { display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: "#9CA3AF", fontWeight: 400 },
+  nudgeMsg: { fontSize: 13, color: "#374151", fontWeight: 500, textAlign: "center", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 16px" },
+
+  successRing: { width: 88, height: 88, borderRadius: "50%", background: "rgba(17,24,39,0.06)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px", animation: "pulse-ring 2s ease-out infinite" },
+  successCircle: { width: 64, height: 64, borderRadius: "50%", background: "#111827", display: "flex", alignItems: "center", justifyContent: "center" },
+  doneTitle: { fontSize: 28, fontWeight: 700, color: "#111827", marginBottom: 10, letterSpacing: "-0.5px" },
+  doneSub: { fontSize: 15, color: "#6B7280", marginBottom: 32, lineHeight: 1.6 },
+
+  confirmCard: { background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, overflow: "hidden", marginBottom: 16, textAlign: "left" },
+  confirmCardHeader: { background: "#F3F4F6", padding: "12px 22px", fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "1px" },
+  confirmRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 22px", borderBottom: "1px solid #E5E7EB" },
+  confirmLabel: { fontSize: 13, color: "#6B7280", fontWeight: 500 },
+  confirmVal: { fontSize: 14, color: "#111827", fontWeight: 600, textAlign: "right", maxWidth: "60%" },
+  meetLink: { fontSize: 14, fontWeight: 600, color: "#111827", textDecoration: "none", borderBottom: "1.5px solid #111827", paddingBottom: 1 },
+
+  emailBanner: { background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "13px 18px", marginBottom: 20, fontSize: 13, color: "#166534", fontWeight: 500, lineHeight: 1.6 },
+  emptyBox: { background: "#F9FAFB", border: "1.5px dashed #E5E7EB", borderRadius: 12, padding: "32px", fontSize: 14, color: "#9CA3AF", textAlign: "center", margin: "0 36px 24px", lineHeight: 1.7 },
+  footer: { textAlign: "center", fontSize: 12, color: "#9CA3AF", marginTop: 24 },
 };
