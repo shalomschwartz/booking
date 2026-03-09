@@ -40,6 +40,7 @@ export default function App() {
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [animating, setAnimating] = useState(false);
+  const [booking, setBooking] = useState(null);
 
   useEffect(() => {
     fetch("/api/availability")
@@ -81,6 +82,7 @@ export default function App() {
       });
       const data = await resp.json();
       if (!data.success) throw new Error(data.error || "Booking failed");
+      setBooking(data);
       goTo("done");
     } catch (e) {
       alert("Something went wrong, please try again!");
@@ -288,10 +290,19 @@ export default function App() {
                     <span style={{ fontSize: 14, fontWeight: 700, color: "#444" }}>{text}</span>
                   </div>
                 ))}
+                {booking?.meetLink && (
+                  <div style={s.confirmRow}>
+                    <span style={{ fontSize: 20 }}>🎥</span>
+                    <a href={booking.meetLink} target="_blank" rel="noreferrer"
+                      style={{ fontSize: 14, fontWeight: 800, color: "#6366f1" }}>
+                      Join Google Meet
+                    </a>
+                  </div>
+                )}
               </div>
               <button className="go-btn"
                 style={{ ...s.goBtn, background: "#f0f0ff", color: "#6366f1", boxShadow: "none", marginTop: 24 }}
-                onClick={() => { setStep("date"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); }}>
+                onClick={() => { setStep("date"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}>
                 Book another slot
               </button>
             </div>
