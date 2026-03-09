@@ -192,32 +192,35 @@ export default function App() {
                     ))}
                   </div>
                 )}
-                {!loading && <div style={s.dayGrid} className="dg">
-                  {availability.days.map((d) => {
-                    const sel = selectedDate === d.date;
-                    const { wk, day, mon } = fmtShort(d.date);
-                    return (
-                      <div
-                        key={d.date}
-                        className={`day-card${sel ? " day-selected" : ""}`}
-                        onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); setNudgeDate(false); }}
-                        style={{
-                          ...s.dayCard,
-                          background: sel ? "#111827" : "#fff",
-                          border: `1.5px solid ${sel ? "#111827" : "#E5E7EB"}`,
-                        }}
-                      >
-                        <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1px", color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{wk}</span>
-                        <span style={{ fontSize: 24, fontWeight: 700, color: sel ? "#fff" : "#111827", lineHeight: 1.1 }}>{day}</span>
-                        <span style={{ fontSize: 10, fontWeight: 500, color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{mon}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                  {availability.days.length === 0 && (
-                    <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
-                  )}
-                </div>}
+                {!loading && (
+                  <>
+                    <div style={s.dayGrid} className="dg">
+                      {availability.days.map((d) => {
+                        const sel = selectedDate === d.date;
+                        const { wk, day, mon } = fmtShort(d.date);
+                        return (
+                          <div
+                            key={d.date}
+                            className={`day-card${sel ? " day-selected" : ""}`}
+                            onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); setNudgeDate(false); }}
+                            style={{
+                              ...s.dayCard,
+                              background: sel ? "#111827" : "#fff",
+                              border: `1.5px solid ${sel ? "#111827" : "#E5E7EB"}`,
+                            }}
+                          >
+                            <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1px", color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{wk}</span>
+                            <span style={{ fontSize: 24, fontWeight: 700, color: sel ? "#fff" : "#111827", lineHeight: 1.1 }}>{day}</span>
+                            <span style={{ fontSize: 10, fontWeight: 500, color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{mon}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {availability.days.length === 0 && (
+                      <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
+                    )}
+                  </>
+                )}
                 <div style={s.cardFooter} className="cf">
                   {nudgeDate && !selectedDate && (
                     <p style={s.nudgeMsg}>Please select a date to continue</p>
