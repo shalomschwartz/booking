@@ -22,21 +22,21 @@ export default async function handler(req, res) {
       const jsDay = new Date(dateStr + 'T12:00:00').getDay();
       if (jsDay === 0 || jsDay === 6) continue;
 
-      const timeMinLocal = `${dateStr}T${String(WORK_START).padStart(2, '0')}:00:00`;
-      const timeMaxLocal = `${dateStr}T${String(WORK_END).padStart(2, '0')}:00:00`;
+      const toUTC = (localDateStr, hour) => {
+        const d = new Date(`${localDateStr}T${String(hour).padStart(2,'0')}:00:00`);
+        const tzOffset = new Date(d.toLocaleString('en-US', { timeZone: TIMEZONE })).getTime() - new Date(d.toLocaleString('en-US', { timeZone: 'UTC' })).getTime();
+        return new Date(d.getTime() - tzOffset);
+      };
 
-      const timeMin = new Date(new Date(timeMinLocal).toLocaleString('en-US', { timeZone: TIMEZONE }));
-      const timeMax = new Date(new Date(timeMaxLocal).toLocaleString('en-US', { timeZone: TIMEZONE }));
-
-      const startISO = new Date(timeMinLocal + ' GMT+0200').toISOString();
-      const endISO = new Date(timeMaxLocal + ' GMT+0200').toISOString();
+      const startUTC = toUTC(dateStr, WORK_START);
+      const endUTC = toUTC(dateStr, WORK_END);
 
       const freebusyResp = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          timeMin: startISO,
-          timeMax: endISO,
+          timeMin: startUTC.toISOString(),
+          timeMax: endUTC.toISOString(),
           timeZone: TIMEZONE,
           items: [{ id: CALENDAR_ID }],
         }),
@@ -46,12 +46,11 @@ export default async function handler(req, res) {
       const busy = freebusyData.calendars?.[CALENDAR_ID]?.busy || [];
 
       const daySlots = [];
-      let cur = new Date(startISO);
-      const end = new Date(endISO);
+      let cur = new Date(startUTC);
 
-      while (cur < end) {
+      while (cur < endUTC) {
         const slotEnd = new Date(cur.getTime() + SLOT_DURATION * 60000);
-        if (slotEnd > end) break;
+        if (slotEnd > endUTC) break;
         const isBusy = busy.some((b) => new Date(b.start) < slotEnd && new Date(b.end) > cur);
         if (!isBusy) daySlots.push({ start: cur.toISOString(), end: slotEnd.toISOString() });
         cur = slotEnd;
