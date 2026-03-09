@@ -113,43 +113,45 @@ export default function App() {
   return (
     <div style={s.page}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700;800&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-        @keyframes scaleIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
-        .fade-up { animation: fadeUp 0.24s cubic-bezier(0.22,1,0.36,1) forwards; }
-        .scale-in { animation: scaleIn 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
-        .day-btn:hover { background: #f4f4f8 !important; border-color: #6366f1 !important; }
-        .slot-btn:hover { background: #f4f4f8 !important; border-color: #6366f1 !important; }
-        .primary-btn:hover:not(:disabled) { background: #4f46e5 !important; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(99,102,241,0.3) !important; }
-        .primary-btn:active:not(:disabled) { transform: translateY(0); }
-        .back-btn:hover { color: #1a1a2e !important; }
-        input:focus, textarea:focus { outline: none !important; border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes scaleIn { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
+        @keyframes shimmer { 0%{opacity:0.6} 50%{opacity:1} 100%{opacity:0.6} }
+        .fade-up { animation: fadeUp 0.28s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .scale-in { animation: scaleIn 0.32s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .day-btn:hover { background: #2a2a2a !important; border-color: #c9a84c !important; }
+        .slot-btn:hover { background: #2a2a2a !important; border-color: #c9a84c !important; color: #fff !important; }
+        .primary-btn:hover:not(:disabled) { background: #c9a84c !important; color: #0a0a0a !important; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(201,168,76,0.35) !important; }
+        .primary-btn:active:not(:disabled) { transform: translateY(0) !important; }
+        .ghost-btn:hover { color: #c9a84c !important; }
+        input:focus, textarea:focus { outline: none !important; border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.12) !important; }
       `}</style>
 
       <div style={s.wrap}>
+
         {/* Header */}
         <div style={s.header}>
-          <div>
-            <p style={s.headerLabel}>Schedule a meeting</p>
-            <h1 style={s.headerTitle}>{CONFIG.BUSINESS_NAME}</h1>
-          </div>
+          <div style={s.goldBar} />
+          <p style={s.eyebrow}>Schedule a meeting</p>
+          <h1 style={s.brandName}>{CONFIG.BUSINESS_NAME}</h1>
           {step !== "done" && (
-            <div style={s.stepTrack}>
+            <div style={s.steps}>
               {["Date", "Time", "Details"].map((label, i) => (
                 <div key={label} style={s.stepItem}>
                   <div style={{
                     ...s.stepDot,
-                    background: stepNum > i ? "#6366f1" : stepNum === i ? "#fff" : "transparent",
-                    border: stepNum > i ? "2px solid #6366f1" : stepNum === i ? "2px solid #6366f1" : "2px solid #d1d1e0",
-                    color: stepNum > i ? "#fff" : stepNum === i ? "#6366f1" : "#aaa",
+                    background: stepNum > i ? "#c9a84c" : stepNum === i ? "transparent" : "transparent",
+                    border: stepNum > i ? "1.5px solid #c9a84c" : stepNum === i ? "1.5px solid #c9a84c" : "1.5px solid #333",
+                    color: stepNum > i ? "#0a0a0a" : stepNum === i ? "#c9a84c" : "#444",
                   }}>
                     {stepNum > i ? "✓" : i + 1}
                   </div>
-                  <span style={{ ...s.stepLabel, color: stepNum === i ? "#1a1a2e" : "#aaa", fontWeight: stepNum === i ? 600 : 400 }}>{label}</span>
-                  {i < 2 && <div style={{ ...s.stepLine, background: stepNum > i ? "#6366f1" : "#e4e4f0" }} />}
+                  <span style={{ ...s.stepLabel, color: stepNum === i ? "#c9a84c" : stepNum > i ? "#666" : "#444" }}>
+                    {label}
+                  </span>
+                  {i < 2 && <div style={{ ...s.stepLine, background: stepNum > i ? "#c9a84c" : "#2a2a2a" }} />}
                 </div>
               ))}
             </div>
@@ -173,14 +175,14 @@ export default function App() {
                       onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); }}
                       style={{
                         ...s.dayBtn,
-                        background: sel ? "#6366f1" : "#fff",
-                        color: sel ? "#fff" : "#1a1a2e",
-                        border: `1.5px solid ${sel ? "#6366f1" : "#e4e4f0"}`,
-                        boxShadow: sel ? "0 4px 16px rgba(99,102,241,0.25)" : "none",
+                        background: sel ? "#c9a84c" : "#1a1a1a",
+                        color: sel ? "#0a0a0a" : "#ccc",
+                        border: `1.5px solid ${sel ? "#c9a84c" : "#2e2e2e"}`,
+                        boxShadow: sel ? "0 4px 20px rgba(201,168,76,0.3)" : "none",
                       }}>
-                      <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.7, textTransform: "uppercase", letterSpacing: 1 }}>{wk}</span>
-                      <span style={{ fontSize: 20, fontWeight: 700 }}>{day}</span>
-                      <span style={{ fontSize: 10, fontWeight: 500, opacity: 0.7 }}>{mon}</span>
+                      <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.7, textTransform: "uppercase", letterSpacing: 1 }}>{wk}</span>
+                      <span style={{ fontSize: 20, fontWeight: 600 }}>{day}</span>
+                      <span style={{ fontSize: 9, fontWeight: 500, opacity: 0.7 }}>{mon}</span>
                     </button>
                   );
                 })}
@@ -189,9 +191,9 @@ export default function App() {
                 <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
               )}
               <button className="primary-btn" disabled={!selectedDate}
-                style={{ ...s.primaryBtn, opacity: selectedDate ? 1 : 0.4 }}
+                style={{ ...s.primaryBtn, opacity: selectedDate ? 1 : 0.35 }}
                 onClick={() => goTo("time")}>
-                Continue
+                Continue →
               </button>
             </div>
           )}
@@ -199,7 +201,7 @@ export default function App() {
           {/* TIME */}
           {step === "time" && (
             <div className="fade-up">
-              <button className="back-btn" style={s.backBtn} onClick={() => goTo("date")}>← Back</button>
+              <button className="ghost-btn" style={s.ghostBtn} onClick={() => goTo("date")}>← Back</button>
               <h2 style={s.cardTitle}>Select a time</h2>
               <p style={s.cardSub}>{fmtDate(selectedDate)} · {CONFIG.SLOT_DURATION} min session</p>
               <div style={s.timeGrid}>
@@ -210,11 +212,11 @@ export default function App() {
                       onClick={() => setSelectedSlot(sl)}
                       style={{
                         ...s.slotBtn,
-                        background: sel ? "#6366f1" : "#fff",
-                        color: sel ? "#fff" : "#1a1a2e",
-                        border: `1.5px solid ${sel ? "#6366f1" : "#e4e4f0"}`,
-                        boxShadow: sel ? "0 4px 16px rgba(99,102,241,0.25)" : "none",
-                        fontWeight: sel ? 600 : 500,
+                        background: sel ? "#c9a84c" : "#1a1a1a",
+                        color: sel ? "#0a0a0a" : "#ccc",
+                        border: `1.5px solid ${sel ? "#c9a84c" : "#2e2e2e"}`,
+                        boxShadow: sel ? "0 4px 20px rgba(201,168,76,0.3)" : "none",
+                        fontWeight: sel ? 600 : 400,
                       }}>
                       {fmtRange(sl.start, sl.end)}
                     </button>
@@ -222,9 +224,9 @@ export default function App() {
                 })}
               </div>
               <button className="primary-btn" disabled={!selectedSlot}
-                style={{ ...s.primaryBtn, opacity: selectedSlot ? 1 : 0.4, marginTop: 24 }}
+                style={{ ...s.primaryBtn, opacity: selectedSlot ? 1 : 0.35, marginTop: 28 }}
                 onClick={() => goTo("details")}>
-                Continue
+                Continue →
               </button>
             </div>
           )}
@@ -232,15 +234,15 @@ export default function App() {
           {/* DETAILS */}
           {step === "details" && (
             <div className="fade-up">
-              <button className="back-btn" style={s.backBtn} onClick={() => goTo("time")}>← Back</button>
+              <button className="ghost-btn" style={s.ghostBtn} onClick={() => goTo("time")}>← Back</button>
               <h2 style={s.cardTitle}>Your details</h2>
               <div style={s.summaryBox}>
                 <div style={s.summaryRow}>
-                  <span style={s.summaryIcon}>📅</span>
+                  <span style={s.summaryDot} />
                   <span style={s.summaryText}>{fmtDate(selectedDate)}</span>
                 </div>
                 <div style={s.summaryRow}>
-                  <span style={s.summaryIcon}>🕐</span>
+                  <span style={s.summaryDot} />
                   <span style={s.summaryText}>{fmtRange(selectedSlot.start, selectedSlot.end)} · {CONFIG.SLOT_DURATION} min</span>
                 </div>
               </div>
@@ -265,7 +267,7 @@ export default function App() {
               </div>
 
               <div style={s.field}>
-                <label style={s.label}>Notes <span style={{ color: "#aaa", fontWeight: 400 }}>(optional)</span></label>
+                <label style={s.label}>Notes <span style={{ color: "#444", fontWeight: 400 }}>(optional)</span></label>
                 <textarea style={{ ...s.input, minHeight: 80, resize: "none" }}
                   placeholder="Topics to cover, questions, context…"
                   value={form.notes}
@@ -282,26 +284,28 @@ export default function App() {
 
           {/* DONE */}
           {step === "done" && (
-            <div className="fade-up" style={{ textAlign: "center", padding: "8px 0" }}>
-              <div style={s.successIcon}>✓</div>
+            <div className="fade-up" style={{ textAlign: "center" }}>
+              <div style={s.successRing}>
+                <div style={s.successInner}>✓</div>
+              </div>
               <h2 style={{ ...s.cardTitle, fontSize: 22, marginBottom: 6 }}>Booking confirmed</h2>
               <p style={{ ...s.cardSub, marginBottom: 28 }}>
                 {fmtDate(selectedDate)} · {fmtRange(selectedSlot.start, selectedSlot.end)}
               </p>
               <div style={s.confirmBox} className="scale-in">
                 {[
-                  ["📧", `Confirmation sent to ${form.email}`],
-                  ["⏰", "Reminder 24 hours before the meeting"],
-                  ["📅", "Calendar invite included"],
-                ].map(([icon, text]) => (
-                  <div key={text} style={s.confirmRow}>
-                    <span style={{ fontSize: 16 }}>{icon}</span>
-                    <span style={s.confirmText}>{text}</span>
+                  ["Confirmation sent to", form.email],
+                  ["Reminder", "24 hours before the meeting"],
+                  ["Calendar invite", "included in your email"],
+                ].map(([label, val]) => (
+                  <div key={label} style={s.confirmRow}>
+                    <span style={s.confirmDot} />
+                    <span style={s.confirmText}><span style={{ color: "#888" }}>{label} </span>{val}</span>
                   </div>
                 ))}
                 {booking?.meetLink && (
-                  <div style={{ ...s.confirmRow, marginTop: 4, paddingTop: 16, borderTop: "1px solid #e8e8f4" }}>
-                    <span style={{ fontSize: 16 }}>🎥</span>
+                  <div style={{ ...s.confirmRow, paddingTop: 14, marginTop: 6, borderTop: "1px solid #2a2a2a" }}>
+                    <span style={s.confirmDot} />
                     <a href={booking.meetLink} target="_blank" rel="noreferrer" style={s.meetLink}>
                       Join Google Meet →
                     </a>
@@ -309,9 +313,9 @@ export default function App() {
                 )}
               </div>
               <button className="primary-btn"
-                style={{ ...s.primaryBtn, background: "#f4f4f8", color: "#6366f1", boxShadow: "none", marginTop: 24 }}
+                style={{ ...s.primaryBtn, background: "transparent", color: "#c9a84c", border: "1.5px solid #c9a84c", boxShadow: "none", marginTop: 24 }}
                 onClick={() => { setStep("date"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}>
-                Book another meeting
+                Schedule another meeting
               </button>
             </div>
           )}
@@ -324,46 +328,49 @@ export default function App() {
 }
 
 const s = {
-  page: { minHeight: "100vh", background: "#f7f7fb", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "32px 16px 80px", fontFamily: "'Inter', sans-serif" },
-  wrap: { width: "100%", maxWidth: 540 },
+  page: { minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px 80px", fontFamily: "'Inter', sans-serif" },
+  wrap: { width: "100%", maxWidth: 520 },
   loadWrap: { display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 140, gap: 16 },
-  spinner: { width: 32, height: 32, border: "3px solid #e4e4f0", borderTop: "3px solid #6366f1", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
-  loadText: { color: "#aaa", fontSize: 14, fontWeight: 500 },
-  errorCard: { background: "#fff", borderRadius: 16, padding: "48px 32px", textAlign: "center", boxShadow: "0 2px 16px rgba(0,0,0,0.06)" },
-  errorTitle: { fontSize: 18, fontWeight: 700, color: "#1a1a2e", marginBottom: 8, fontFamily: "'Sora', sans-serif" },
-  errorSub: { color: "#888", fontSize: 14 },
-  header: { marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 },
-  headerLabel: { fontSize: 11, fontWeight: 600, color: "#6366f1", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 4 },
-  headerTitle: { fontSize: 22, fontWeight: 800, color: "#0f0f1a", fontFamily: "'Sora', sans-serif", letterSpacing: "-0.5px" },
-  stepTrack: { display: "flex", alignItems: "center", gap: 0 },
-  stepItem: { display: "flex", alignItems: "center", gap: 6 },
-  stepDot: { width: 22, height: 22, borderRadius: "50%", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  stepLabel: { fontSize: 11, whiteSpace: "nowrap" },
-  stepLine: { width: 20, height: 1.5, margin: "0 6px", borderRadius: 1 },
-  card: { background: "#fff", borderRadius: 20, padding: "32px 28px", boxShadow: "0 2px 24px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03)", marginBottom: 16 },
-  cardTitle: { fontSize: 20, fontWeight: 700, color: "#0f0f1a", marginBottom: 4, fontFamily: "'Sora', sans-serif" },
-  cardSub: { fontSize: 13, color: "#888", fontWeight: 400, marginBottom: 24 },
+  spinner: { width: 28, height: 28, border: "2px solid #2a2a2a", borderTop: "2px solid #c9a84c", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
+  loadText: { color: "#444", fontSize: 13, fontWeight: 400 },
+  errorCard: { background: "#141414", borderRadius: 16, padding: "48px 32px", textAlign: "center", border: "1px solid #222" },
+  errorTitle: { fontSize: 17, fontWeight: 600, color: "#e0e0e0", marginBottom: 8, fontFamily: "'Playfair Display', serif" },
+  errorSub: { color: "#555", fontSize: 13 },
+  header: { marginBottom: 24 },
+  goldBar: { width: 28, height: 2, background: "#c9a84c", marginBottom: 14, borderRadius: 1 },
+  eyebrow: { fontSize: 10, fontWeight: 600, color: "#c9a84c", textTransform: "uppercase", letterSpacing: "2px", marginBottom: 6 },
+  brandName: { fontSize: 24, fontWeight: 700, color: "#f0f0f0", fontFamily: "'Playfair Display', serif", letterSpacing: "-0.3px", marginBottom: 20 },
+  steps: { display: "flex", alignItems: "center" },
+  stepItem: { display: "flex", alignItems: "center", gap: 7 },
+  stepDot: { width: 20, height: 20, borderRadius: "50%", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  stepLabel: { fontSize: 11, fontWeight: 500, letterSpacing: "0.3px" },
+  stepLine: { width: 24, height: 1, margin: "0 8px" },
+  card: { background: "#141414", borderRadius: 18, padding: "32px 28px", border: "1px solid #222", marginBottom: 16 },
+  cardTitle: { fontSize: 19, fontWeight: 600, color: "#f0f0f0", marginBottom: 4, fontFamily: "'Playfair Display', serif", letterSpacing: "-0.2px" },
+  cardSub: { fontSize: 12, color: "#555", fontWeight: 400, marginBottom: 24, letterSpacing: "0.2px" },
   dayGrid: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginBottom: 24 },
-  dayBtn: { display: "flex", flexDirection: "column", alignItems: "center", padding: "10px 4px", borderRadius: 12, cursor: "pointer", gap: 3, transition: "all 0.15s" },
+  dayBtn: { display: "flex", flexDirection: "column", alignItems: "center", padding: "11px 4px", borderRadius: 10, cursor: "pointer", gap: 3, transition: "all 0.15s" },
   timeGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 },
-  slotBtn: { padding: "12px 8px", borderRadius: 10, cursor: "pointer", fontSize: 13, textAlign: "center", transition: "all 0.15s", letterSpacing: "0.3px" },
-  primaryBtn: { width: "100%", padding: "14px", background: "#6366f1", color: "#fff", border: "none", borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: "pointer", transition: "all 0.15s", boxShadow: "0 4px 16px rgba(99,102,241,0.2)", fontFamily: "'Inter', sans-serif", letterSpacing: "0.1px" },
-  backBtn: { background: "none", border: "none", color: "#aaa", fontSize: 13, fontWeight: 500, cursor: "pointer", padding: 0, marginBottom: 20, display: "block", fontFamily: "'Inter', sans-serif", transition: "color 0.15s" },
-  summaryBox: { background: "#f7f7fb", borderRadius: 10, padding: "14px 16px", marginBottom: 24, display: "flex", flexDirection: "column", gap: 8 },
+  slotBtn: { padding: "12px 8px", borderRadius: 9, cursor: "pointer", fontSize: 13, textAlign: "center", transition: "all 0.15s", letterSpacing: "0.5px" },
+  primaryBtn: { width: "100%", padding: "14px", background: "#c9a84c", color: "#0a0a0a", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.15s", boxShadow: "0 4px 20px rgba(201,168,76,0.2)", fontFamily: "'Inter', sans-serif", letterSpacing: "0.3px" },
+  ghostBtn: { background: "none", border: "none", color: "#555", fontSize: 12, fontWeight: 500, cursor: "pointer", padding: 0, marginBottom: 22, display: "block", fontFamily: "'Inter', sans-serif", transition: "color 0.15s", letterSpacing: "0.2px" },
+  summaryBox: { background: "#0f0f0f", border: "1px solid #222", borderRadius: 10, padding: "14px 16px", marginBottom: 24, display: "flex", flexDirection: "column", gap: 10 },
   summaryRow: { display: "flex", alignItems: "center", gap: 10 },
-  summaryIcon: { fontSize: 14 },
-  summaryText: { fontSize: 13, fontWeight: 500, color: "#1a1a2e" },
+  summaryDot: { width: 4, height: 4, borderRadius: "50%", background: "#c9a84c", flexShrink: 0 },
+  summaryText: { fontSize: 13, fontWeight: 400, color: "#ccc" },
   field: { marginBottom: 18 },
-  label: { display: "block", fontSize: 12, fontWeight: 600, color: "#555", marginBottom: 6, letterSpacing: "0.3px" },
-  input: { width: "100%", padding: "11px 14px", background: "#fafafa", border: "1.5px solid #e4e4f0", borderRadius: 10, color: "#0f0f1a", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 400, transition: "all 0.15s" },
-  inputErr: { borderColor: "#ef4444", background: "#fff8f8" },
-  errMsg: { color: "#ef4444", fontSize: 12, fontWeight: 500, marginTop: 5 },
-  hint: { color: "#bbb", fontSize: 12, marginTop: 5 },
-  successIcon: { width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff", fontSize: 22, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", boxShadow: "0 8px 24px rgba(99,102,241,0.3)" },
-  confirmBox: { background: "#f7f7fb", borderRadius: 12, padding: "20px", display: "flex", flexDirection: "column", gap: 12, textAlign: "left" },
+  label: { display: "block", fontSize: 11, fontWeight: 500, color: "#666", marginBottom: 7, letterSpacing: "0.5px", textTransform: "uppercase" },
+  input: { width: "100%", padding: "11px 14px", background: "#0f0f0f", border: "1px solid #2a2a2a", borderRadius: 9, color: "#e0e0e0", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 400, transition: "all 0.15s" },
+  inputErr: { borderColor: "#b04040" },
+  errMsg: { color: "#b04040", fontSize: 11, fontWeight: 500, marginTop: 5 },
+  hint: { color: "#444", fontSize: 11, marginTop: 5 },
+  successRing: { width: 60, height: 60, borderRadius: "50%", border: "1.5px solid #c9a84c", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" },
+  successInner: { width: 44, height: 44, borderRadius: "50%", background: "#c9a84c", color: "#0a0a0a", fontSize: 18, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" },
+  confirmBox: { background: "#0f0f0f", border: "1px solid #222", borderRadius: 12, padding: "20px", display: "flex", flexDirection: "column", gap: 12, textAlign: "left" },
   confirmRow: { display: "flex", alignItems: "center", gap: 12 },
-  confirmText: { fontSize: 13, fontWeight: 500, color: "#444" },
-  meetLink: { fontSize: 13, fontWeight: 600, color: "#6366f1", textDecoration: "none" },
-  emptyBox: { background: "#f7f7fb", borderRadius: 10, padding: "16px", fontSize: 13, color: "#888", marginBottom: 20, textAlign: "center", lineHeight: 1.6 },
-  footer: { textAlign: "center", fontSize: 11, color: "#ccc", fontWeight: 500, letterSpacing: "0.3px" },
+  confirmDot: { width: 4, height: 4, borderRadius: "50%", background: "#c9a84c", flexShrink: 0 },
+  confirmText: { fontSize: 13, color: "#ccc", fontWeight: 400 },
+  meetLink: { fontSize: 13, fontWeight: 600, color: "#c9a84c", textDecoration: "none" },
+  emptyBox: { background: "#0f0f0f", border: "1px solid #222", borderRadius: 10, padding: "16px", fontSize: 13, color: "#555", marginBottom: 20, textAlign: "center", lineHeight: 1.7 },
+  footer: { textAlign: "center", fontSize: 11, color: "#333", fontWeight: 400, letterSpacing: "0.5px" },
 };
