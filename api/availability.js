@@ -12,29 +12,31 @@ export default async function handler(req, res) {
     const TIMEZONE = process.env.TIMEZONE || 'Asia/Jerusalem';
     const CALENDAR_ID = process.env.CALENDAR_ID || 'primary';
 
-    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
     const days = [];
 
     for (let i = 0; i < DAYS_AHEAD; i++) {
-      const dateObj = new Date(todayStr + 'T00:00:00');
+      const dateObj = new Date();
       dateObj.setDate(dateObj.getDate() + i);
-      const dateStr = dateObj.toLocaleDateString('en-CA', { timeZone: TIMEZONE }).slice(0, 10);
+      const dateStr = dateObj.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
 
       const jsDay = new Date(dateStr + 'T12:00:00').getDay();
       if (jsDay === 0 || jsDay === 6) continue;
 
-      const slotStart = new Date(`${dateStr}T${String(WORK_START).padStart(2,'0')}:00:00`);
-      const slotEnd = new Date(`${dateStr}T${String(WORK_END).padStart(2,'0')}:00:00`);
+      const timeMinLocal = `${dateStr}T${String(WORK_START).padStart(2, '0')}:00:00`;
+      const timeMaxLocal = `${dateStr}T${String(WORK_END).padStart(2, '0')}:00:00`;
 
-      const timeMin = new Date(`${dateStr}T${String(WORK_START).padStart(2,'0')}:00:00`).toLocaleString('sv-SE', { timeZone: TIMEZONE }).replace(' ', 'T') + ':00';
-      const timeMax = new Date(`${dateStr}T${String(WORK_END).padStart(2,'0')}:00:00`).toLocaleString('sv-SE', { timeZone: TIMEZONE }).replace(' ', 'T') + ':00';
+      const timeMin = new Date(new Date(timeMinLocal).toLocaleString('en-US', { timeZone: TIMEZONE }));
+      const timeMax = new Date(new Date(timeMaxLocal).toLocaleString('en-US', { timeZone: TIMEZONE }));
+
+      const startISO = new Date(timeMinLocal + ' GMT+0200').toISOString();
+      const endISO = new Date(timeMaxLocal + ' GMT+0200').toISOString();
 
       const freebusyResp = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          timeMin: new Date(timeMin).toISOString(),
-          timeMax: new Date(timeMax).toISOString(),
+          timeMin: startISO,
+          timeMax: endISO,
           timeZone: TIMEZONE,
           items: [{ id: CALENDAR_ID }],
         }),
@@ -44,21 +46,14 @@ export default async function handler(req, res) {
       const busy = freebusyData.calendars?.[CALENDAR_ID]?.busy || [];
 
       const daySlots = [];
-      let cur = new Date(`${dateStr}T${String(WORK_START).padStart(2,'0')}:00:00`);
-      const end = new Date(`${dateStr}T${String(WORK_END).padStart(2,'0')}:00:00`);
+      let cur = new Date(startISO);
+      const end = new Date(endISO);
 
       while (cur < end) {
         const slotEnd = new Date(cur.getTime() + SLOT_DURATION * 60000);
         if (slotEnd > end) break;
-
-        const curISO = cur.toLocaleString('sv-SE', { timeZone: TIMEZONE }).replace(' ', 'T');
-        const endISO = slotEnd.toLocaleString('sv-SE', { timeZone: TIMEZONE }).replace(' ', 'T');
-
         const isBusy = busy.some((b) => new Date(b.start) < slotEnd && new Date(b.end) > cur);
-        if (!isBusy) daySlots.push({
-          start: new Date(curISO).toISOString(),
-          end: new Date(endISO).toISOString(),
-        });
+        if (!isBusy) daySlots.push({ start: cur.toISOString(), end: slotEnd.toISOString() });
         cur = slotEnd;
       }
 
