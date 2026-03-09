@@ -92,17 +92,6 @@ export default function App() {
 
   const stepNum = STEPS.indexOf(step);
 
-  if (loading) return (
-    <div style={s.page}>
-      <style>{globalStyles}</style>
-      <Nav />
-      <div style={s.loadWrap}>
-        <div style={s.spinnerRing} />
-        <p style={s.loadText}>Checking availability…</p>
-      </div>
-    </div>
-  );
-
   if (error) return (
     <div style={s.page}>
       <style>{globalStyles}</style>
@@ -192,7 +181,18 @@ export default function App() {
                   <h2 style={s.cardTitle}>Select a date</h2>
                   <p style={s.cardSub}>Available days over the next 2 weeks</p>
                 </div>
-                <div style={s.dayGrid} className="dg">
+                {loading && (
+                  <div style={s.dayGrid} className="dg">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                      <div key={i} className="skeleton-card" style={{ ...s.dayCard, background: "#F3F4F6", border: "1.5px solid #F3F4F6", gap: 6 }}>
+                        <div style={{ width: 20, height: 8, borderRadius: 4, background: "#E5E7EB" }} />
+                        <div style={{ width: 28, height: 24, borderRadius: 6, background: "#E5E7EB" }} />
+                        <div style={{ width: 20, height: 8, borderRadius: 4, background: "#E5E7EB" }} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {!loading && <div style={s.dayGrid} className="dg">
                   {availability.days.map((d) => {
                     const sel = selectedDate === d.date;
                     const { wk, day, mon } = fmtShort(d.date);
@@ -214,9 +214,10 @@ export default function App() {
                     );
                   })}
                 </div>
-                {availability.days.length === 0 && (
-                  <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
-                )}
+                  {availability.days.length === 0 && (
+                    <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
+                  )}
+                </div>}
                 <div style={s.cardFooter} className="cf">
                   {nudgeDate && !selectedDate && (
                     <p style={s.nudgeMsg}>Please select a date to continue</p>
@@ -228,6 +229,7 @@ export default function App() {
                     <button
                       className="btn-primary"
                       style={{ ...s.btnPrimary, opacity: selectedDate ? 1 : 0.35 }}
+                      disabled={loading}
                       onClick={() => { if (!selectedDate) { setNudgeDate(true); return; } goTo("time"); }}
                     >
                       Continue
@@ -484,6 +486,8 @@ const globalStyles = `
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
   @keyframes scaleUp { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:scale(1); } }
   @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 1; } 70% { transform: scale(1.15); opacity: 0; } 100% { transform: scale(1.15); opacity: 0; } }
+  @keyframes shimmer { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+  .skeleton-card { animation: shimmer 1.4s ease-in-out infinite; }
 
   .anim { animation: fadeUp 0.28s cubic-bezier(0.22,1,0.36,1) forwards; }
   .anim-scale { animation: scaleUp 0.32s cubic-bezier(0.22,1,0.36,1) forwards; }
