@@ -7,7 +7,7 @@ export default async function handler(req, res) {
       client_id: GOOGLE_CLIENT_ID,
       redirect_uri: `${baseUrl}/api/auth`,
       response_type: 'code',
-      scope: 'https://www.googleapis.com/auth/calendar',
+      scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/gmail.send',
       access_type: 'offline',
       prompt: 'consent',
     });

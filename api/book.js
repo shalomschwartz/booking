@@ -12,8 +12,6 @@ export default async function handler(req, res) {
     const accessToken = await getAccessToken();
     const TIMEZONE = process.env.TIMEZONE || 'Asia/Jerusalem';
     const CALENDAR_ID = process.env.CALENDAR_ID || 'primary';
-    const OWNER_NAME = process.env.OWNER_NAME || 'Your Name';
-
     const event = {
       summary: `Meeting consultation with ${name}`,
       description: [`Client: ${name}`, `Email: ${email}`, notes ? `Notes: ${notes}` : null].filter(Boolean).join('\n'),
@@ -59,15 +57,6 @@ export default async function handler(req, res) {
 }
 
 async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration, businessName }) {
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
-  if (!RESEND_API_KEY) return;
-
-  const fmt = (iso) => new Date(iso).toLocaleString('en-US', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', hour12: false,
-  });
-
   const startDate = new Date(start);
   const endDate = new Date(end);
   const dateStr = startDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -218,18 +207,22 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
 </body>
 </html>`;
 
-  await fetch('https://api.resend.com/emails', {
+  const accessToken = await getAccessToken();
+  const rawMessage = [
+    `To: ${email}`,
+    `Subject: Booking confirmed – ${dateStr}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=utf-8',
+    '',
+    html,
+  ].join('\r\n');
+
+  const encoded = Buffer.from(rawMessage).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: FROM_EMAIL,
-      to: email,
-      subject: `Booking confirmed – ${dateStr}`,
-      html,
-    }),
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw: encoded }),
   });
 }
 
