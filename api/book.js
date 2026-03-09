@@ -20,6 +20,12 @@ export default async function handler(req, res) {
       start: { dateTime: start, timeZone: TIMEZONE },
       end: { dateTime: end, timeZone: TIMEZONE },
       attendees: [{ email, displayName: name }],
+      conferenceData: {
+        createRequest: {
+          requestId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          conferenceSolutionKey: { type: 'hangoutsMeet' },
+        },
+      },
       reminders: {
         useDefault: false,
         overrides: [
@@ -31,7 +37,7 @@ export default async function handler(req, res) {
     };
 
     const calResp = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?sendUpdates=all`,
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?sendUpdates=all&conferenceDataVersion=1`,
       {
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
@@ -41,7 +47,8 @@ export default async function handler(req, res) {
 
     if (!calResp.ok) return res.status(500).json({ error: 'Failed to create event' });
     const created = await calResp.json();
-    return res.status(200).json({ success: true, eventId: created.id });
+    const meetLink = created.conferenceData?.entryPoints?.find(e => e.entryPointType === 'video')?.uri || null;
+    return res.status(200).json({ success: true, eventId: created.id, meetLink });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: err.message });
