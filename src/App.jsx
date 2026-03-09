@@ -574,7 +574,7 @@ const s = {
   secureNote: { display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: "#9CA3AF", fontWeight: 400 },
   nudgeMsg: { fontSize: 13, color: "#374151", fontWeight: 500, textAlign: "center", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 16px" },
 
-  successRing: { width: 88, height: 88, borderRadius: "50%", background: "rgba(17,24,39,0.06)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px", animation: "pulse-ring 2s ease-out infinite" },
+  successRing: { width: 88, height: 88, borderRadius: "50%", background: "rgba(17,24,39,0.06)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" },
   successCircle: { width: 64, height: 64, borderRadius: "50%", background: "#111827", display: "flex", alignItems: "center", justifyContent: "center" },
   doneTitle: { fontSize: 28, fontWeight: 700, color: "#111827", marginBottom: 10, letterSpacing: "-0.5px" },
   doneSub: { fontSize: 15, color: "#6B7280", marginBottom: 32, lineHeight: 1.6 },
