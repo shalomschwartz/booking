@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const OWNER_NAME = process.env.OWNER_NAME || 'Your Name';
 
     const event = {
-      summary: `Appointment with ${OWNER_NAME}`,
+      summary: `Meeting consultation with ${name}`,
       description: [`Client: ${name}`, `Email: ${email}`, notes ? `Notes: ${notes}` : null].filter(Boolean).join('\n'),
       start: { dateTime: start, timeZone: TIMEZONE },
       end: { dateTime: end, timeZone: TIMEZONE },
