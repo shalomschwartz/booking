@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 const CONFIG = {
-  BUSINESS_NAME: import.meta.env.VITE_BUSINESS_NAME || "Your Business",
+  BUSINESS_NAME: import.meta.env.VITE_BUSINESS_NAME || "Shalom AI Solutions",
   OWNER_NAME: import.meta.env.VITE_OWNER_NAME || "Your Name",
   SLOT_DURATION: parseInt(import.meta.env.VITE_SLOT_DURATION_MINS || "30"),
 };
@@ -53,7 +53,7 @@ export default function App() {
 
   const goTo = (nextStep) => {
     setAnimating(true);
-    setTimeout(() => { setStep(nextStep); setAnimating(false); }, 200);
+    setTimeout(() => { setStep(nextStep); setAnimating(false); }, 220);
   };
 
   const slotsForDate = selectedDate
@@ -92,18 +92,21 @@ export default function App() {
 
   if (loading) return (
     <div style={s.page}>
+      <Nav />
       <div style={s.loadWrap}>
-        <div style={s.spinner} />
-        <p style={s.loadText}>Loading availability…</p>
+        <div style={s.spinnerRing} />
+        <p style={s.loadText}>Checking availability…</p>
       </div>
     </div>
   );
 
   if (error) return (
     <div style={s.page}>
-      <div style={s.wrap}>
+      <Nav />
+      <div style={s.centerWrap}>
         <div style={s.errorCard}>
-          <p style={s.errorTitle}>Scheduling Unavailable</p>
+          <div style={s.errorIcon}>!</div>
+          <h3 style={s.errorTitle}>Scheduling Unavailable</h3>
           <p style={s.errorSub}>Please contact us directly to book an appointment.</p>
         </div>
       </div>
@@ -113,264 +116,422 @@ export default function App() {
   return (
     <div style={s.page}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700;800&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #f5f7fb; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes scaleIn { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
-        @keyframes shimmer { 0%{opacity:0.6} 50%{opacity:1} 100%{opacity:0.6} }
-        .fade-up { animation: fadeUp 0.28s cubic-bezier(0.22,1,0.36,1) forwards; }
-        .scale-in { animation: scaleIn 0.32s cubic-bezier(0.22,1,0.36,1) forwards; }
-        .day-btn:hover { background: #2a2a2a !important; border-color: #c9a84c !important; }
-        .slot-btn:hover { background: #2a2a2a !important; border-color: #c9a84c !important; color: #fff !important; }
-        .primary-btn:hover:not(:disabled) { background: #c9a84c !important; color: #0a0a0a !important; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(201,168,76,0.35) !important; }
-        .primary-btn:active:not(:disabled) { transform: translateY(0) !important; }
-        .ghost-btn:hover { color: #c9a84c !important; }
-        input:focus, textarea:focus { outline: none !important; border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.12) !important; }
+        @keyframes fadeSlideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes scaleUp { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+        @keyframes checkDraw { from{stroke-dashoffset:100} to{stroke-dashoffset:0} }
+        .anim { animation: fadeSlideUp 0.32s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .anim-scale { animation: scaleUp 0.28s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+        .day-card { transition: all 0.18s ease; cursor: pointer; }
+        .day-card:hover { border-color: #2563eb !important; background: #eff6ff !important; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(37,99,235,0.12) !important; }
+
+        .slot-pill { transition: all 0.15s ease; cursor: pointer; }
+        .slot-pill:hover { border-color: #2563eb !important; background: #eff6ff !important; color: #2563eb !important; }
+
+        .btn-primary { transition: all 0.18s ease; cursor: pointer; }
+        .btn-primary:hover:not(:disabled) { background: #1d4ed8 !important; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(37,99,235,0.35) !important; }
+        .btn-primary:active:not(:disabled) { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .btn-ghost { transition: all 0.15s ease; cursor: pointer; }
+        .btn-ghost:hover { color: #2563eb !important; }
+
+        .nav-link { transition: color 0.15s ease; }
+        .nav-link:hover { color: #2563eb !important; }
+
+        input:focus, textarea:focus {
+          outline: none;
+          border-color: #2563eb !important;
+          box-shadow: 0 0 0 4px rgba(37,99,235,0.1) !important;
+          background: #fff !important;
+        }
+        input::placeholder, textarea::placeholder { color: #bdc3cc; }
       `}</style>
 
-      <div style={s.wrap}>
+      <Nav stepNum={step !== "done" ? stepNum : null} />
 
-        {/* Header */}
-        <div style={s.header}>
-          <div style={s.goldBar} />
-          <p style={s.eyebrow}>Schedule a meeting</p>
-          <h1 style={s.brandName}>{CONFIG.BUSINESS_NAME}</h1>
+      <main style={s.main}>
+        <div style={s.container}>
+
+          {/* Page header */}
           {step !== "done" && (
-            <div style={s.steps}>
-              {["Date", "Time", "Details"].map((label, i) => (
-                <div key={label} style={s.stepItem}>
+            <div style={s.pageHeader}>
+              <p style={s.pageEyebrow}>AI Business Solutions</p>
+              <h1 style={s.pageTitle}>Book an Appointment</h1>
+              <p style={s.pageSub}>Schedule a {CONFIG.SLOT_DURATION}-minute session with {CONFIG.OWNER_NAME}</p>
+            </div>
+          )}
+
+          {/* Progress */}
+          {step !== "done" && (
+            <div style={s.progressBar}>
+              {["Choose date", "Choose time", "Your details"].map((label, i) => (
+                <div key={label} style={s.progressItem}>
                   <div style={{
-                    ...s.stepDot,
-                    background: stepNum > i ? "#c9a84c" : stepNum === i ? "transparent" : "transparent",
-                    border: stepNum > i ? "1.5px solid #c9a84c" : stepNum === i ? "1.5px solid #c9a84c" : "1.5px solid #333",
-                    color: stepNum > i ? "#0a0a0a" : stepNum === i ? "#c9a84c" : "#444",
+                    ...s.progressDot,
+                    background: stepNum > i ? "#2563eb" : stepNum === i ? "#fff" : "#f1f3f8",
+                    border: stepNum >= i ? "2px solid #2563eb" : "2px solid #e2e6ef",
+                    color: stepNum > i ? "#fff" : stepNum === i ? "#2563eb" : "#b0b8c8",
+                    boxShadow: stepNum === i ? "0 0 0 4px rgba(37,99,235,0.12)" : "none",
                   }}>
-                    {stepNum > i ? "✓" : i + 1}
+                    {stepNum > i ? (
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : i + 1}
                   </div>
-                  <span style={{ ...s.stepLabel, color: stepNum === i ? "#c9a84c" : stepNum > i ? "#666" : "#444" }}>
+                  <span style={{ ...s.progressLabel, color: stepNum >= i ? "#1e293b" : "#b0b8c8", fontWeight: stepNum === i ? 600 : 400 }}>
                     {label}
                   </span>
-                  {i < 2 && <div style={{ ...s.stepLine, background: stepNum > i ? "#c9a84c" : "#2a2a2a" }} />}
+                  {i < 2 && (
+                    <div style={{ ...s.progressLine, background: stepNum > i ? "#2563eb" : "#e2e6ef" }} />
+                  )}
                 </div>
               ))}
             </div>
           )}
-        </div>
 
-        {/* Card */}
-        <div style={{ ...s.card, opacity: animating ? 0 : 1, transition: "opacity 0.2s" }}>
+          {/* Main card */}
+          <div style={{ ...s.card, opacity: animating ? 0 : 1, transform: animating ? "translateY(8px)" : "translateY(0)", transition: "opacity 0.22s ease, transform 0.22s ease" }}>
 
-          {/* DATE */}
-          {step === "date" && (
-            <div className="fade-up">
-              <h2 style={s.cardTitle}>Select a date</h2>
-              <p style={s.cardSub}>Available days for the next 2 weeks</p>
-              <div style={s.dayGrid}>
-                {availability.days.map((d) => {
-                  const sel = selectedDate === d.date;
-                  const { wk, day, mon } = fmtShort(d.date);
-                  return (
-                    <button key={d.date} className="day-btn"
-                      onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); }}
-                      style={{
-                        ...s.dayBtn,
-                        background: sel ? "#c9a84c" : "#1a1a1a",
-                        color: sel ? "#0a0a0a" : "#ccc",
-                        border: `1.5px solid ${sel ? "#c9a84c" : "#2e2e2e"}`,
-                        boxShadow: sel ? "0 4px 20px rgba(201,168,76,0.3)" : "none",
-                      }}>
-                      <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.7, textTransform: "uppercase", letterSpacing: 1 }}>{wk}</span>
-                      <span style={{ fontSize: 20, fontWeight: 600 }}>{day}</span>
-                      <span style={{ fontSize: 9, fontWeight: 500, opacity: 0.7 }}>{mon}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              {availability.days.length === 0 && (
-                <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
-              )}
-              <button className="primary-btn" disabled={!selectedDate}
-                style={{ ...s.primaryBtn, opacity: selectedDate ? 1 : 0.35 }}
-                onClick={() => goTo("time")}>
-                Continue →
-              </button>
-            </div>
-          )}
-
-          {/* TIME */}
-          {step === "time" && (
-            <div className="fade-up">
-              <button className="ghost-btn" style={s.ghostBtn} onClick={() => goTo("date")}>← Back</button>
-              <h2 style={s.cardTitle}>Select a time</h2>
-              <p style={s.cardSub}>{fmtDate(selectedDate)} · {CONFIG.SLOT_DURATION} min session</p>
-              <div style={s.timeGrid}>
-                {slotsForDate.map((sl, i) => {
-                  const sel = selectedSlot?.start === sl.start;
-                  return (
-                    <button key={i} className="slot-btn"
-                      onClick={() => setSelectedSlot(sl)}
-                      style={{
-                        ...s.slotBtn,
-                        background: sel ? "#c9a84c" : "#1a1a1a",
-                        color: sel ? "#0a0a0a" : "#ccc",
-                        border: `1.5px solid ${sel ? "#c9a84c" : "#2e2e2e"}`,
-                        boxShadow: sel ? "0 4px 20px rgba(201,168,76,0.3)" : "none",
-                        fontWeight: sel ? 600 : 400,
-                      }}>
-                      {fmtRange(sl.start, sl.end)}
-                    </button>
-                  );
-                })}
-              </div>
-              <button className="primary-btn" disabled={!selectedSlot}
-                style={{ ...s.primaryBtn, opacity: selectedSlot ? 1 : 0.35, marginTop: 28 }}
-                onClick={() => goTo("details")}>
-                Continue →
-              </button>
-            </div>
-          )}
-
-          {/* DETAILS */}
-          {step === "details" && (
-            <div className="fade-up">
-              <button className="ghost-btn" style={s.ghostBtn} onClick={() => goTo("time")}>← Back</button>
-              <h2 style={s.cardTitle}>Your details</h2>
-              <div style={s.summaryBox}>
-                <div style={s.summaryRow}>
-                  <span style={s.summaryDot} />
-                  <span style={s.summaryText}>{fmtDate(selectedDate)}</span>
+            {/* STEP: DATE */}
+            {step === "date" && (
+              <div className="anim">
+                <div style={s.cardHeader}>
+                  <h2 style={s.cardTitle}>Select a date</h2>
+                  <p style={s.cardSub}>Available days over the next 2 weeks</p>
                 </div>
-                <div style={s.summaryRow}>
-                  <span style={s.summaryDot} />
-                  <span style={s.summaryText}>{fmtRange(selectedSlot.start, selectedSlot.end)} · {CONFIG.SLOT_DURATION} min</span>
+                <div style={s.divider} />
+                <div style={s.dayGrid}>
+                  {availability.days.map((d) => {
+                    const sel = selectedDate === d.date;
+                    const { wk, day, mon } = fmtShort(d.date);
+                    return (
+                      <div key={d.date} className="day-card"
+                        onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); }}
+                        style={{
+                          ...s.dayCard,
+                          background: sel ? "#2563eb" : "#fff",
+                          border: `2px solid ${sel ? "#2563eb" : "#e2e6ef"}`,
+                          boxShadow: sel ? "0 8px 24px rgba(37,99,235,0.25)" : "0 1px 4px rgba(0,0,0,0.04)",
+                          transform: sel ? "translateY(-2px)" : "none",
+                        }}>
+                        <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", color: sel ? "rgba(255,255,255,0.7)" : "#94a3b8" }}>{wk}</span>
+                        <span style={{ fontSize: 24, fontWeight: 700, color: sel ? "#fff" : "#1e293b", lineHeight: 1.1 }}>{day}</span>
+                        <span style={{ fontSize: 11, fontWeight: 500, color: sel ? "rgba(255,255,255,0.7)" : "#94a3b8" }}>{mon}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
-
-              <div style={s.field}>
-                <label style={s.label}>Full name</label>
-                <input style={{ ...s.input, ...(formErrors.name ? s.inputErr : {}) }}
-                  placeholder="Jane Smith" value={form.name} autoFocus
-                  onChange={(e) => { setForm(f => ({ ...f, name: e.target.value })); setFormErrors(fe => ({ ...fe, name: undefined })); }} />
-                {formErrors.name && <p style={s.errMsg}>{formErrors.name}</p>}
-              </div>
-
-              <div style={s.field}>
-                <label style={s.label}>Email address</label>
-                <input style={{ ...s.input, ...(formErrors.email ? s.inputErr : {}) }}
-                  type="email" placeholder="jane@company.com" value={form.email}
-                  onChange={(e) => { setForm(f => ({ ...f, email: e.target.value })); setFormErrors(fe => ({ ...fe, email: undefined })); }} />
-                {formErrors.email
-                  ? <p style={s.errMsg}>{formErrors.email}</p>
-                  : <p style={s.hint}>A confirmation will be sent to this address</p>
-                }
-              </div>
-
-              <div style={s.field}>
-                <label style={s.label}>Notes <span style={{ color: "#444", fontWeight: 400 }}>(optional)</span></label>
-                <textarea style={{ ...s.input, minHeight: 80, resize: "none" }}
-                  placeholder="Topics to cover, questions, context…"
-                  value={form.notes}
-                  onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))} />
-              </div>
-
-              <button className="primary-btn" disabled={submitting}
-                style={{ ...s.primaryBtn, opacity: submitting ? 0.7 : 1 }}
-                onClick={submitBooking}>
-                {submitting ? "Confirming…" : "Confirm booking"}
-              </button>
-            </div>
-          )}
-
-          {/* DONE */}
-          {step === "done" && (
-            <div className="fade-up" style={{ textAlign: "center" }}>
-              <div style={s.successRing}>
-                <div style={s.successInner}>✓</div>
-              </div>
-              <h2 style={{ ...s.cardTitle, fontSize: 22, marginBottom: 6 }}>Booking confirmed</h2>
-              <p style={{ ...s.cardSub, marginBottom: 28 }}>
-                {fmtDate(selectedDate)} · {fmtRange(selectedSlot.start, selectedSlot.end)}
-              </p>
-              <div style={s.confirmBox} className="scale-in">
-                {[
-                  ["Confirmation sent to", form.email],
-                  ["Reminder", "24 hours before the meeting"],
-                  ["Calendar invite", "included in your email"],
-                ].map(([label, val]) => (
-                  <div key={label} style={s.confirmRow}>
-                    <span style={s.confirmDot} />
-                    <span style={s.confirmText}><span style={{ color: "#888" }}>{label} </span>{val}</span>
-                  </div>
-                ))}
-                {booking?.meetLink && (
-                  <div style={{ ...s.confirmRow, paddingTop: 14, marginTop: 6, borderTop: "1px solid #2a2a2a" }}>
-                    <span style={s.confirmDot} />
-                    <a href={booking.meetLink} target="_blank" rel="noreferrer" style={s.meetLink}>
-                      Join Google Meet →
-                    </a>
+                {availability.days.length === 0 && (
+                  <div style={s.emptyState}>
+                    <p style={{ fontSize: 14, color: "#94a3b8", textAlign: "center", lineHeight: 1.7 }}>No availability in the next 2 weeks.<br />Please check back soon.</p>
                   </div>
                 )}
+                <div style={s.cardFooter}>
+                  <button className="btn-primary" disabled={!selectedDate}
+                    style={s.btnPrimary}
+                    onClick={() => goTo("time")}>
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 6 }}>
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <button className="primary-btn"
-                style={{ ...s.primaryBtn, background: "transparent", color: "#c9a84c", border: "1.5px solid #c9a84c", boxShadow: "none", marginTop: 24 }}
-                onClick={() => { setStep("date"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}>
-                Schedule another meeting
-              </button>
-            </div>
-          )}
-        </div>
+            )}
 
-        <p style={s.footer}>{CONFIG.BUSINESS_NAME} · Secure scheduling</p>
-      </div>
+            {/* STEP: TIME */}
+            {step === "time" && (
+              <div className="anim">
+                <div style={s.cardHeader}>
+                  <button className="btn-ghost" style={s.btnBack} onClick={() => goTo("date")}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginRight: 4 }}>
+                      <path d="M11 7H3M6 3L2 7l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Back
+                  </button>
+                  <h2 style={s.cardTitle}>Select a time</h2>
+                  <p style={s.cardSub}>{fmtDate(selectedDate)} · {CONFIG.SLOT_DURATION}-minute sessions</p>
+                </div>
+                <div style={s.divider} />
+                <div style={s.timeGrid}>
+                  {slotsForDate.map((sl, i) => {
+                    const sel = selectedSlot?.start === sl.start;
+                    return (
+                      <div key={i} className="slot-pill"
+                        onClick={() => setSelectedSlot(sl)}
+                        style={{
+                          ...s.slotPill,
+                          background: sel ? "#2563eb" : "#fff",
+                          color: sel ? "#fff" : "#1e293b",
+                          border: `2px solid ${sel ? "#2563eb" : "#e2e6ef"}`,
+                          boxShadow: sel ? "0 4px 16px rgba(37,99,235,0.25)" : "0 1px 4px rgba(0,0,0,0.04)",
+                          fontWeight: sel ? 600 : 400,
+                        }}>
+                        {fmtRange(sl.start, sl.end)}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={s.cardFooter}>
+                  <button className="btn-primary" disabled={!selectedSlot}
+                    style={s.btnPrimary}
+                    onClick={() => goTo("details")}>
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 6 }}>
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP: DETAILS */}
+            {step === "details" && (
+              <div className="anim">
+                <div style={s.cardHeader}>
+                  <button className="btn-ghost" style={s.btnBack} onClick={() => goTo("time")}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ marginRight: 4 }}>
+                      <path d="M11 7H3M6 3L2 7l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Back
+                  </button>
+                  <h2 style={s.cardTitle}>Your details</h2>
+                  <p style={s.cardSub}>Almost done — just a few details</p>
+                </div>
+                <div style={s.divider} />
+
+                {/* Booking summary */}
+                <div style={s.summaryStrip}>
+                  <div style={s.summaryChip}>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <rect x="1" y="2" width="11" height="10" rx="2" stroke="#2563eb" strokeWidth="1.4"/>
+                      <path d="M4 1v2M9 1v2M1 5h11" stroke="#2563eb" strokeWidth="1.4" strokeLinecap="round"/>
+                    </svg>
+                    {fmtDate(selectedDate)}
+                  </div>
+                  <div style={s.summaryChip}>
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <circle cx="6.5" cy="6.5" r="5.5" stroke="#2563eb" strokeWidth="1.4"/>
+                      <path d="M6.5 3.5v3l2 1.5" stroke="#2563eb" strokeWidth="1.4" strokeLinecap="round"/>
+                    </svg>
+                    {fmtRange(selectedSlot.start, selectedSlot.end)} · {CONFIG.SLOT_DURATION} min
+                  </div>
+                </div>
+
+                <div style={s.formGrid}>
+                  <div style={s.field}>
+                    <label style={s.label}>Full name</label>
+                    <input style={{ ...s.input, ...(formErrors.name ? s.inputErr : {}) }}
+                      placeholder="Jane Smith" value={form.name} autoFocus
+                      onChange={(e) => { setForm(f => ({ ...f, name: e.target.value })); setFormErrors(fe => ({ ...fe, name: undefined })); }} />
+                    {formErrors.name && <p style={s.errMsg}>{formErrors.name}</p>}
+                  </div>
+                  <div style={s.field}>
+                    <label style={s.label}>Email address</label>
+                    <input style={{ ...s.input, ...(formErrors.email ? s.inputErr : {}) }}
+                      type="email" placeholder="jane@company.com" value={form.email}
+                      onChange={(e) => { setForm(f => ({ ...f, email: e.target.value })); setFormErrors(fe => ({ ...fe, email: undefined })); }} />
+                    {formErrors.email
+                      ? <p style={s.errMsg}>{formErrors.email}</p>
+                      : <p style={s.inputHint}>Confirmation will be sent to this address</p>
+                    }
+                  </div>
+                  <div style={{ ...s.field, gridColumn: "1 / -1" }}>
+                    <label style={s.label}>Notes <span style={{ color: "#b0b8c8", fontWeight: 400 }}>(optional)</span></label>
+                    <textarea style={{ ...s.input, minHeight: 88, resize: "none" }}
+                      placeholder="Topics to discuss, questions, or anything helpful to know beforehand…"
+                      value={form.notes}
+                      onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))} />
+                  </div>
+                </div>
+
+                <div style={s.cardFooter}>
+                  <button className="btn-primary" disabled={submitting}
+                    style={{ ...s.btnPrimary, opacity: submitting ? 0.75 : 1 }}
+                    onClick={submitBooking}>
+                    {submitting ? (
+                      <>
+                        <div style={{ width: 16, height: 16, border: "2px solid rgba(255,255,255,0.3)", borderTop: "2px solid #fff", borderRadius: "50%", animation: "spin 0.7s linear infinite", marginRight: 8 }} />
+                        Confirming…
+                      </>
+                    ) : (
+                      <>
+                        Confirm booking
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 6 }}>
+                          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </>
+                    )}
+                  </button>
+                  <p style={s.secureNote}>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginRight: 4 }}>
+                      <path d="M6 1L2 3v3c0 2.5 1.7 4.7 4 5.4C8.3 10.7 10 8.5 10 6V3L6 1z" stroke="#94a3b8" strokeWidth="1.2" strokeLinejoin="round"/>
+                    </svg>
+                    Your information is secure and will never be shared
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* STEP: DONE */}
+            {step === "done" && (
+              <div className="anim" style={{ textAlign: "center", padding: "16px 0 8px" }}>
+                <div style={s.successCircle}>
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M8 16l5.5 5.5L24 10" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{ strokeDasharray: 100, strokeDashoffset: 0, animation: "checkDraw 0.5s ease 0.2s both" }} />
+                  </svg>
+                </div>
+                <h2 style={{ ...s.cardTitle, fontSize: 26, marginBottom: 8 }}>Booking confirmed!</h2>
+                <p style={{ ...s.cardSub, marginBottom: 32 }}>
+                  We look forward to speaking with you.
+                </p>
+
+                <div style={s.confirmCard} className="anim-scale">
+                  <div style={s.confirmHeader}>Appointment details</div>
+                  {[
+                    { icon: "📅", label: "Date", val: fmtDate(selectedDate) },
+                    { icon: "🕐", label: "Time", val: `${fmtRange(selectedSlot.start, selectedSlot.end)} (${CONFIG.SLOT_DURATION} min)` },
+                    { icon: "👤", label: "Name", val: form.name },
+                    { icon: "📧", label: "Email", val: form.email },
+                  ].map(({ icon, label, val }) => (
+                    <div key={label} style={s.confirmRow}>
+                      <span style={s.confirmLabel}>{label}</span>
+                      <span style={s.confirmVal}>{val}</span>
+                    </div>
+                  ))}
+                  {booking?.meetLink && (
+                    <div style={{ ...s.confirmRow, paddingTop: 16, marginTop: 8, borderTop: "1px solid #e2e6ef" }}>
+                      <span style={s.confirmLabel}>Meeting link</span>
+                      <a href={booking.meetLink} target="_blank" rel="noreferrer" style={s.meetLink}>
+                        Join Google Meet →
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ background: "#eff6ff", borderRadius: 10, padding: "12px 16px", marginBottom: 24, fontSize: 13, color: "#3b82f6", fontWeight: 500 }}>
+                  A confirmation email has been sent to {form.email}
+                </div>
+
+                <button className="btn-primary"
+                  style={{ ...s.btnPrimary, background: "#f1f5f9", color: "#475569", boxShadow: "none" }}
+                  onClick={() => { setStep("date"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}>
+                  Schedule another appointment
+                </button>
+              </div>
+            )}
+          </div>
+
+          <p style={s.footer}>© {new Date().getFullYear()} {CONFIG.BUSINESS_NAME} · All rights reserved</p>
+        </div>
+      </main>
     </div>
   );
 }
 
+function Nav({ stepNum }) {
+  return (
+    <header style={nav.bar}>
+      <div style={nav.inner}>
+        <div style={nav.logo}>
+          <div style={nav.logoMark}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1l2 5h5l-4 3 1.5 5L8 11l-4.5 3L5 9 1 6h5z" fill="#fff" opacity="0.9"/>
+            </svg>
+          </div>
+          <span style={nav.logoText}>{CONFIG.BUSINESS_NAME}</span>
+        </div>
+        <div style={nav.links}>
+          <a href="#" className="nav-link" style={nav.link}>Home</a>
+          <a href="#" className="nav-link" style={nav.link}>Services</a>
+          <a href="#" className="nav-link" style={nav.link}>Contact</a>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+const nav = {
+  bar: { position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid #e8ecf3", },
+  inner: { maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" },
+  logo: { display: "flex", alignItems: "center", gap: 10 },
+  logoMark: { width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #2563eb, #1d4ed8)", display: "flex", alignItems: "center", justifyContent: "center" },
+  logoText: { fontSize: 15, fontWeight: 700, color: "#0f172a", fontFamily: "'DM Sans', sans-serif", letterSpacing: "-0.3px" },
+  links: { display: "flex", alignItems: "center", gap: 28 },
+  link: { fontSize: 14, color: "#64748b", textDecoration: "none", fontWeight: 500, fontFamily: "'DM Sans', sans-serif" },
+};
+
 const s = {
-  page: { minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px 80px", fontFamily: "'Inter', sans-serif" },
-  wrap: { width: "100%", maxWidth: 520 },
-  loadWrap: { display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 140, gap: 16 },
-  spinner: { width: 28, height: 28, border: "2px solid #2a2a2a", borderTop: "2px solid #c9a84c", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
-  loadText: { color: "#444", fontSize: 13, fontWeight: 400 },
-  errorCard: { background: "#141414", borderRadius: 16, padding: "48px 32px", textAlign: "center", border: "1px solid #222" },
-  errorTitle: { fontSize: 17, fontWeight: 600, color: "#e0e0e0", marginBottom: 8, fontFamily: "'Playfair Display', serif" },
-  errorSub: { color: "#555", fontSize: 13 },
-  header: { marginBottom: 24 },
-  goldBar: { width: 28, height: 2, background: "#c9a84c", marginBottom: 14, borderRadius: 1 },
-  eyebrow: { fontSize: 10, fontWeight: 600, color: "#c9a84c", textTransform: "uppercase", letterSpacing: "2px", marginBottom: 6 },
-  brandName: { fontSize: 24, fontWeight: 700, color: "#f0f0f0", fontFamily: "'Playfair Display', serif", letterSpacing: "-0.3px", marginBottom: 20 },
-  steps: { display: "flex", alignItems: "center" },
-  stepItem: { display: "flex", alignItems: "center", gap: 7 },
-  stepDot: { width: 20, height: 20, borderRadius: "50%", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  stepLabel: { fontSize: 11, fontWeight: 500, letterSpacing: "0.3px" },
-  stepLine: { width: 24, height: 1, margin: "0 8px" },
-  card: { background: "#141414", borderRadius: 18, padding: "32px 28px", border: "1px solid #222", marginBottom: 16 },
-  cardTitle: { fontSize: 19, fontWeight: 600, color: "#f0f0f0", marginBottom: 4, fontFamily: "'Playfair Display', serif", letterSpacing: "-0.2px" },
-  cardSub: { fontSize: 12, color: "#555", fontWeight: 400, marginBottom: 24, letterSpacing: "0.2px" },
-  dayGrid: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginBottom: 24 },
-  dayBtn: { display: "flex", flexDirection: "column", alignItems: "center", padding: "11px 4px", borderRadius: 10, cursor: "pointer", gap: 3, transition: "all 0.15s" },
-  timeGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 },
-  slotBtn: { padding: "12px 8px", borderRadius: 9, cursor: "pointer", fontSize: 13, textAlign: "center", transition: "all 0.15s", letterSpacing: "0.5px" },
-  primaryBtn: { width: "100%", padding: "14px", background: "#c9a84c", color: "#0a0a0a", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.15s", boxShadow: "0 4px 20px rgba(201,168,76,0.2)", fontFamily: "'Inter', sans-serif", letterSpacing: "0.3px" },
-  ghostBtn: { background: "none", border: "none", color: "#555", fontSize: 12, fontWeight: 500, cursor: "pointer", padding: 0, marginBottom: 22, display: "block", fontFamily: "'Inter', sans-serif", transition: "color 0.15s", letterSpacing: "0.2px" },
-  summaryBox: { background: "#0f0f0f", border: "1px solid #222", borderRadius: 10, padding: "14px 16px", marginBottom: 24, display: "flex", flexDirection: "column", gap: 10 },
-  summaryRow: { display: "flex", alignItems: "center", gap: 10 },
-  summaryDot: { width: 4, height: 4, borderRadius: "50%", background: "#c9a84c", flexShrink: 0 },
-  summaryText: { fontSize: 13, fontWeight: 400, color: "#ccc" },
-  field: { marginBottom: 18 },
-  label: { display: "block", fontSize: 11, fontWeight: 500, color: "#666", marginBottom: 7, letterSpacing: "0.5px", textTransform: "uppercase" },
-  input: { width: "100%", padding: "11px 14px", background: "#0f0f0f", border: "1px solid #2a2a2a", borderRadius: 9, color: "#e0e0e0", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 400, transition: "all 0.15s" },
-  inputErr: { borderColor: "#b04040" },
-  errMsg: { color: "#b04040", fontSize: 11, fontWeight: 500, marginTop: 5 },
-  hint: { color: "#444", fontSize: 11, marginTop: 5 },
-  successRing: { width: 60, height: 60, borderRadius: "50%", border: "1.5px solid #c9a84c", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" },
-  successInner: { width: 44, height: 44, borderRadius: "50%", background: "#c9a84c", color: "#0a0a0a", fontSize: 18, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" },
-  confirmBox: { background: "#0f0f0f", border: "1px solid #222", borderRadius: 12, padding: "20px", display: "flex", flexDirection: "column", gap: 12, textAlign: "left" },
-  confirmRow: { display: "flex", alignItems: "center", gap: 12 },
-  confirmDot: { width: 4, height: 4, borderRadius: "50%", background: "#c9a84c", flexShrink: 0 },
-  confirmText: { fontSize: 13, color: "#ccc", fontWeight: 400 },
-  meetLink: { fontSize: 13, fontWeight: 600, color: "#c9a84c", textDecoration: "none" },
-  emptyBox: { background: "#0f0f0f", border: "1px solid #222", borderRadius: 10, padding: "16px", fontSize: 13, color: "#555", marginBottom: 20, textAlign: "center", lineHeight: 1.7 },
-  footer: { textAlign: "center", fontSize: 11, color: "#333", fontWeight: 400, letterSpacing: "0.5px" },
+  page: { minHeight: "100vh", background: "#f5f7fb", fontFamily: "'DM Sans', sans-serif" },
+  main: { padding: "40px 16px 80px" },
+  container: { maxWidth: 640, margin: "0 auto" },
+
+  loadWrap: { display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 120, gap: 16 },
+  spinnerRing: { width: 36, height: 36, border: "3px solid #e2e6ef", borderTop: "3px solid #2563eb", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
+  loadText: { fontSize: 14, color: "#94a3b8", fontWeight: 500 },
+
+  centerWrap: { display: "flex", justifyContent: "center", paddingTop: 80 },
+  errorCard: { background: "#fff", borderRadius: 16, padding: "48px 40px", textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.06)", maxWidth: 400 },
+  errorIcon: { width: 48, height: 48, borderRadius: "50%", background: "#fef2f2", color: "#ef4444", fontSize: 22, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" },
+  errorTitle: { fontSize: 18, fontWeight: 700, color: "#0f172a", marginBottom: 8 },
+  errorSub: { fontSize: 14, color: "#64748b", lineHeight: 1.6 },
+
+  pageHeader: { textAlign: "center", marginBottom: 32 },
+  pageEyebrow: { fontSize: 11, fontWeight: 600, color: "#2563eb", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 8 },
+  pageTitle: { fontSize: 32, fontWeight: 700, color: "#0f172a", fontFamily: "'DM Serif Display', serif", letterSpacing: "-0.5px", marginBottom: 8 },
+  pageSub: { fontSize: 15, color: "#64748b", fontWeight: 400 },
+
+  progressBar: { display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 28, gap: 0 },
+  progressItem: { display: "flex", alignItems: "center", gap: 8 },
+  progressDot: { width: 28, height: 28, borderRadius: "50%", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s ease" },
+  progressLabel: { fontSize: 12, whiteSpace: "nowrap", transition: "all 0.2s ease" },
+  progressLine: { width: 40, height: 2, borderRadius: 1, margin: "0 8px", transition: "background 0.3s ease" },
+
+  card: { background: "#fff", borderRadius: 20, boxShadow: "0 4px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)", overflow: "hidden" },
+  cardHeader: { padding: "32px 32px 0" },
+  cardTitle: { fontSize: 21, fontWeight: 700, color: "#0f172a", marginBottom: 4, letterSpacing: "-0.3px" },
+  cardSub: { fontSize: 13, color: "#94a3b8", fontWeight: 400, lineHeight: 1.5 },
+  divider: { height: 1, background: "#f1f3f8", margin: "24px 0 0" },
+  cardFooter: { padding: "24px 32px 32px", display: "flex", flexDirection: "column", alignItems: "stretch", gap: 12 },
+
+  dayGrid: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, padding: "24px 32px" },
+  dayCard: { display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 6px", borderRadius: 12, gap: 4, transition: "all 0.18s ease" },
+
+  timeGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, padding: "24px 32px" },
+  slotPill: { padding: "12px 8px", borderRadius: 10, fontSize: 13, textAlign: "center", transition: "all 0.15s ease", letterSpacing: "0.2px" },
+
+  btnPrimary: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "14px 24px", background: "#2563eb", color: "#fff", border: "none", borderRadius: 10, fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", boxShadow: "0 4px 16px rgba(37,99,235,0.25)", letterSpacing: "0.1px" },
+  btnBack: { display: "inline-flex", alignItems: "center", background: "none", border: "none", color: "#94a3b8", fontSize: 13, fontWeight: 500, fontFamily: "'DM Sans', sans-serif", padding: 0, marginBottom: 16, letterSpacing: "0.1px" },
+
+  summaryStrip: { display: "flex", gap: 8, padding: "20px 32px", flexWrap: "wrap" },
+  summaryChip: { display: "flex", alignItems: "center", gap: 6, background: "#eff6ff", color: "#2563eb", borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 600 },
+
+  formGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: "0 32px 8px" },
+  field: { display: "flex", flexDirection: "column", gap: 6 },
+  label: { fontSize: 12, fontWeight: 600, color: "#475569", letterSpacing: "0.3px", textTransform: "uppercase" },
+  input: { padding: "11px 14px", background: "#f8fafc", border: "1.5px solid #e2e6ef", borderRadius: 10, color: "#0f172a", fontSize: 14, fontFamily: "'DM Sans', sans-serif", fontWeight: 400, transition: "all 0.15s ease" },
+  inputErr: { borderColor: "#ef4444", background: "#fff8f8" },
+  errMsg: { fontSize: 12, color: "#ef4444", fontWeight: 500 },
+  inputHint: { fontSize: 11, color: "#b0b8c8" },
+  secureNote: { display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#b0b8c8", fontWeight: 400 },
+
+  successCircle: { width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #2563eb, #1d4ed8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", boxShadow: "0 12px 32px rgba(37,99,235,0.3)" },
+
+  confirmCard: { background: "#f8fafc", border: "1px solid #e2e6ef", borderRadius: 14, overflow: "hidden", marginBottom: 16, textAlign: "left" },
+  confirmHeader: { background: "#f1f5f9", padding: "12px 20px", fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "1px" },
+  confirmRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px", borderBottom: "1px solid #e2e6ef" },
+  confirmLabel: { fontSize: 12, color: "#94a3b8", fontWeight: 500 },
+  confirmVal: { fontSize: 13, color: "#0f172a", fontWeight: 600, textAlign: "right", maxWidth: "65%" },
+  meetLink: { fontSize: 13, fontWeight: 600, color: "#2563eb", textDecoration: "none" },
+
+  emptyState: { padding: "32px", background: "#f8fafc", margin: "24px 32px", borderRadius: 12, border: "1px dashed #e2e6ef" },
+  footer: { textAlign: "center", fontSize: 12, color: "#b0b8c8", fontWeight: 400, marginTop: 24, letterSpacing: "0.2px" },
 };
