@@ -39,6 +39,8 @@ export default function App() {
   const [submitting, setSubmitting] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [booking, setBooking] = useState(null);
+  const [nudgeTime, setNudgeTime] = useState(false);
+  const [nudgeDate, setNudgeDate] = useState(false);
 
   useEffect(() => {
     fetch("/api/availability")
@@ -122,21 +124,30 @@ export default function App() {
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
         @keyframes scaleUp { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
+        @keyframes nudge { 0%{transform:scale(1)} 30%{transform:scale(1.02)} 60%{transform:scale(0.98)} 100%{transform:scale(1)} }
         .anim { animation: fadeUp 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
         .anim-scale { animation: scaleUp 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .nudge { animation: nudge 0.35s ease; }
+
         .day-card { transition: all 0.18s ease !important; cursor: pointer; }
-        .day-card:hover { border-color: #2563eb !important; background: #eff6ff !important; transform: translateY(-3px) !important; box-shadow: 0 8px 20px rgba(37,99,235,0.15) !important; color: #1e293b !important; }
+        .day-card:hover { border-color: #2563eb !important; background: #eff6ff !important; transform: translateY(-3px) !important; box-shadow: 0 8px 20px rgba(37,99,235,0.15) !important; }
         .day-card:hover span { color: #2563eb !important; }
+
         .slot-pill { transition: all 0.15s ease !important; cursor: pointer; }
-        .slot-pill:hover { border-color: #2563eb !important; color: #2563eb !important; background: #eff6ff !important; }
+        .slot-pill:hover:not(.slot-selected) { border-color: #2563eb !important; color: #2563eb !important; background: #eff6ff !important; transform: translateY(-1px) !important; box-shadow: 0 4px 12px rgba(37,99,235,0.12) !important; }
+
         .btn-primary { transition: all 0.18s ease !important; cursor: pointer; }
         .btn-primary:hover:not(:disabled) { background: #1d4ed8 !important; transform: translateY(-1px) !important; box-shadow: 0 10px 28px rgba(37,99,235,0.4) !important; color: #fff !important; }
         .btn-primary:active:not(:disabled) { transform: translateY(0) !important; }
-        .btn-primary:disabled { opacity: 0.4 !important; cursor: not-allowed !important; }
-        .btn-ghost:hover { color: #2563eb !important; }
+
+        .btn-ghost { transition: all 0.15s ease !important; }
+        .btn-ghost:hover { color: #1e293b !important; background: #f1f5f9 !important; }
+
+        .btn-secondary { transition: all 0.18s ease !important; cursor: pointer; }
+        .btn-secondary:hover { background: #e8ecf5 !important; color: #1e293b !important; }
+
         input:focus, textarea:focus { outline: none !important; border-color: #2563eb !important; box-shadow: 0 0 0 4px rgba(37,99,235,0.1) !important; background: #fff !important; }
         input::placeholder, textarea::placeholder { color: #c0c8d8; }
-        .btn-secondary:hover { background: #e8ecf5 !important; color: #1e293b !important; }
       `}</style>
 
       <Nav />
@@ -180,6 +191,7 @@ export default function App() {
 
           <div style={{ ...s.card, opacity: animating ? 0 : 1, transform: animating ? "translateY(10px)" : "translateY(0)", transition: "opacity 0.22s, transform 0.22s" }}>
 
+            {/* DATE */}
             {step === "date" && (
               <div className="anim">
                 <div style={s.sectionHead}>
@@ -192,7 +204,7 @@ export default function App() {
                     const { wk, day, mon } = fmtShort(d.date);
                     return (
                       <div key={d.date} className="day-card"
-                        onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); }}
+                        onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); setNudgeDate(false); }}
                         style={{
                           ...s.dayCard,
                           background: sel ? "#2563eb" : "#fff",
@@ -211,47 +223,78 @@ export default function App() {
                   <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
                 )}
                 <div style={s.btnWrap}>
-                  <button className="btn-primary" disabled={!selectedDate} style={s.btnPrimary} onClick={() => goTo("time")}>
-                    Continue →
-                  </button>
+                  {nudgeDate && !selectedDate && (
+                    <p style={s.nudgeMsg}>👆 Please pick a date first</p>
+                  )}
+                  <div
+                    onMouseEnter={() => { if (!selectedDate) setNudgeDate(true); }}
+                    onMouseLeave={() => setNudgeDate(false)}
+                  >
+                    <button
+                      className="btn-primary"
+                      style={{ ...s.btnPrimary, opacity: selectedDate ? 1 : 0.45 }}
+                      onClick={() => { if (!selectedDate) { setNudgeDate(true); return; } goTo("time"); }}
+                    >
+                      Continue →
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* TIME */}
             {step === "time" && (
               <div className="anim">
                 <div style={s.sectionHead}>
-                  <button className="btn-ghost" style={s.btnBack} onClick={() => goTo("date")}>← Back</button>
+                  <button className="btn-ghost" style={s.btnBack} onClick={() => goTo("date")}>
+                    ← Back
+                  </button>
                   <h2 style={s.sectionTitle}>Select a time</h2>
                   <p style={s.sectionSub}>{fmtDate(selectedDate)} · {CONFIG.SLOT_DURATION}-minute sessions</p>
                 </div>
+
                 <div style={s.timeGrid}>
                   {slotsForDate.map((sl, i) => {
                     const sel = selectedSlot?.start === sl.start;
                     return (
-                      <div key={i} className="slot-pill"
-                        onClick={() => setSelectedSlot(sl)}
+                      <div key={i}
+                        className={`slot-pill${sel ? " slot-selected" : ""}`}
+                        onClick={() => { setSelectedSlot(sl); setNudgeTime(false); }}
                         style={{
                           ...s.slotPill,
-                          background: sel ? "#2563eb" : "#fff",
+                          background: sel ? "#2563eb" : "#f8fafc",
                           color: sel ? "#fff" : "#1e293b",
                           border: `2px solid ${sel ? "#2563eb" : "#e4e9f2"}`,
-                          boxShadow: sel ? "0 4px 16px rgba(37,99,235,0.25)" : "0 2px 8px rgba(0,0,0,0.04)",
-                          fontWeight: sel ? 600 : 400,
+                          boxShadow: sel ? "0 4px 16px rgba(37,99,235,0.25)" : "none",
+                          fontWeight: sel ? 600 : 500,
                         }}>
                         {fmtRange(sl.start, sl.end)}
                       </div>
                     );
                   })}
                 </div>
+
                 <div style={s.btnWrap}>
-                  <button className="btn-primary" disabled={!selectedSlot} style={{ ...s.btnPrimary, opacity: selectedSlot ? 1 : 0.4 }} onClick={() => goTo("details")}>
-                    Continue →
-                  </button>
+                  {nudgeTime && !selectedSlot && (
+                    <p style={s.nudgeMsg}>👆 Please pick a time first</p>
+                  )}
+                  <div
+                    onMouseEnter={() => { if (!selectedSlot) setNudgeTime(true); }}
+                    onMouseLeave={() => setNudgeTime(false)}
+                  >
+                    <button
+                      className="btn-primary"
+                      style={{ ...s.btnPrimary, opacity: selectedSlot ? 1 : 0.45 }}
+                      onClick={() => { if (!selectedSlot) { setNudgeTime(true); return; } goTo("details"); }}
+                    >
+                      Continue →
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* DETAILS */}
             {step === "details" && (
               <div className="anim">
                 <div style={s.sectionHead}>
@@ -316,6 +359,7 @@ export default function App() {
               </div>
             )}
 
+            {/* DONE */}
             {step === "done" && (
               <div className="anim" style={{ textAlign: "center", padding: "8px 0" }}>
                 <div style={s.successCircle}>
@@ -327,7 +371,6 @@ export default function App() {
                 <p style={{ fontSize: 17, color: "#64748b", marginBottom: 36, lineHeight: 1.6 }}>
                   We look forward to speaking with you.
                 </p>
-
                 <div style={s.confirmCard} className="anim-scale">
                   <div style={s.confirmCardHeader}>Appointment Summary</div>
                   {[
@@ -350,13 +393,10 @@ export default function App() {
                     </div>
                   )}
                 </div>
-
                 <div style={s.emailBanner}>
                   ✉️ &nbsp; A confirmation email has been sent to <strong>{form.email}</strong>
                 </div>
-
-                <button className="btn-secondary"
-                  style={s.btnSecondary}
+                <button className="btn-secondary" style={s.btnSecondary}
                   onClick={() => { setStep("date"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}>
                   Schedule another appointment
                 </button>
@@ -417,8 +457,8 @@ const s = {
   sectionSub: { fontSize: 15, color: "#64748b", fontWeight: 400, lineHeight: 1.5 },
   dayGrid: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, padding: "28px 36px" },
   dayCard: { display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 6px", borderRadius: 14, gap: 5 },
-  timeGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, padding: "28px 36px" },
-  slotPill: { padding: "14px 8px", borderRadius: 12, fontSize: 14, textAlign: "center", letterSpacing: "0.3px" },
+  timeGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, padding: "28px 36px" },
+  slotPill: { padding: "16px 10px", borderRadius: 12, fontSize: 15, textAlign: "center", letterSpacing: "0.2px" },
   summaryRow: { display: "flex", gap: 10, padding: "20px 36px", flexWrap: "wrap" },
   summaryChip: { display: "inline-flex", alignItems: "center", gap: 7, background: "#eff6ff", color: "#2563eb", borderRadius: 10, padding: "9px 14px", fontSize: 14, fontWeight: 600 },
   formGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, padding: "4px 36px 8px" },
@@ -428,10 +468,11 @@ const s = {
   inputErr: { borderColor: "#ef4444", background: "#fff8f8" },
   errMsg: { fontSize: 13, color: "#ef4444", fontWeight: 500 },
   inputHint: { fontSize: 13, color: "#94a3b8" },
-  btnWrap: { padding: "8px 36px 36px", display: "flex", flexDirection: "column", gap: 12 },
+  btnWrap: { padding: "8px 36px 36px", display: "flex", flexDirection: "column", gap: 10 },
   btnPrimary: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "16px 24px", background: "#2563eb", color: "#fff", border: "none", borderRadius: 12, fontSize: 16, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", boxShadow: "0 4px 20px rgba(37,99,235,0.25)", letterSpacing: "0.1px" },
-  btnSecondary: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "16px 24px", background: "#f1f5f9", color: "#1e293b", border: "1.5px solid #e2e8f0", borderRadius: 12, fontSize: 16, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", boxShadow: "none", letterSpacing: "0.1px", cursor: "pointer", transition: "all 0.18s ease" },
-  btnBack: { background: "none", border: "none", color: "#8896b0", fontSize: 14, fontWeight: 500, fontFamily: "'DM Sans', sans-serif", padding: 0, marginBottom: 18, display: "inline-flex", alignItems: "center", letterSpacing: "0.1px" },
+  btnSecondary: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "16px 24px", background: "#f1f5f9", color: "#1e293b", border: "1.5px solid #e2e8f0", borderRadius: 12, fontSize: 16, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", boxShadow: "none", letterSpacing: "0.1px" },
+  btnBack: { background: "#f1f5f9", border: "1.5px solid #e2e8f0", color: "#475569", fontSize: 14, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", padding: "8px 16px", borderRadius: 8, marginBottom: 20, display: "inline-flex", alignItems: "center", cursor: "pointer" },
+  nudgeMsg: { fontSize: 14, color: "#f59e0b", fontWeight: 600, textAlign: "center", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "10px 16px" },
   successCircle: { width: 80, height: 80, borderRadius: "50%", background: "linear-gradient(135deg, #2563eb, #1d4ed8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", boxShadow: "0 16px 40px rgba(37,99,235,0.35)" },
   confirmCard: { background: "#f8fafc", border: "1.5px solid #e2e8f0", borderRadius: 16, overflow: "hidden", marginBottom: 20, textAlign: "left" },
   confirmCardHeader: { background: "#f1f5f9", padding: "14px 24px", fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "1px" },
