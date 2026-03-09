@@ -210,7 +210,7 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
   const accessToken = await getAccessToken();
   const rawMessage = [
     `To: ${email}`,
-    `Subject: Booking confirmed – ${dateStr}`,
+    `Subject: Booking confirmed - ${dateStr}`,
     'MIME-Version: 1.0',
     'Content-Type: text/html; charset=utf-8',
     '',
