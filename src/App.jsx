@@ -407,10 +407,10 @@ export default function App() {
                 </div>
                 <h2 style={s.doneTitle}>You're booked!</h2>
                 <p style={s.doneSub}>
-                  Looking forward to speaking with you on <strong>{fmtDate(selectedDate)}</strong>.
+                  Looking forward to meeting with you, <strong>{form.name}</strong> on <strong>{fmtDate(selectedDate)}</strong>.
                 </p>
 
-                <div style={s.confirmCard} className="anim-scale">
+                <div style={s.confirmCard}>
                   <div style={s.confirmCardHeader}>Appointment Summary</div>
                   {[
                     { label: "Date", val: fmtDate(selectedDate) },
