@@ -252,10 +252,14 @@ export default function App() {
                           </button>
                         </div>
                         <span style={s.monthLabel}>{calMonthName}</span>
-                        {canPrevMonth ? (
+                        {(canPrevMonth || (selectedDate && selectedDate !== todayStr)) ? (
                           <button
                             style={{ ...s.calNavBtn, fontSize: 12, fontWeight: 600, color: "#374151", padding: "0 10px", width: "auto", letterSpacing: "-0.1px" }}
-                            onClick={() => { const n = new Date(); setCurrentMonth({ year: n.getFullYear(), month: n.getMonth() }); }}
+                            onClick={() => {
+                              const n = new Date();
+                              setCurrentMonth({ year: n.getFullYear(), month: n.getMonth() });
+                              if (availSet.has(todayStr)) { setSelectedDate(todayStr); setSelectedSlot(null); }
+                            }}
                           >
                             Today
                           </button>
