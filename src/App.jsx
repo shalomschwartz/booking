@@ -59,6 +59,15 @@ export default function App() {
         if (data.error) throw new Error(data.error);
         monthCacheRef.current[monthStr] = data;
         setAvailability(data);
+        // Silently prefetch next month in the background
+        const next = new Date(currentMonth.year, currentMonth.month + 1, 1);
+        const nextStr = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+        if (!monthCacheRef.current[nextStr]) {
+          fetch(`/api/availability?month=${nextStr}`)
+            .then(r => r.json())
+            .then(d => { if (!d.error) monthCacheRef.current[nextStr] = d; })
+            .catch(() => {});
+        }
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));

@@ -13,6 +13,12 @@ export default async function handler(req, res) {
     const WORK_DAYS = (process.env.WORK_DAYS || '0,1,2,3,4').split(',').map(Number);
     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
 
+    const toUTC = (localDateStr, hour) => {
+      const d = new Date(`${localDateStr}T${String(hour).padStart(2, '0')}:00:00`);
+      const tzOffset = new Date(d.toLocaleString('en-US', { timeZone: TIMEZONE })).getTime() - new Date(d.toLocaleString('en-US', { timeZone: 'UTC' })).getTime();
+      return new Date(d.getTime() - tzOffset);
+    };
+
     // Build list of dates to check — either a full month or next 14 days
     const monthParam = req.query.month; // e.g. "2026-04"
     const datesToCheck = [];
@@ -30,36 +36,39 @@ export default async function handler(req, res) {
       }
     }
 
+    // Filter to working days that aren't in the past
+    const workingDates = datesToCheck.filter(dateStr => {
+      if (dateStr < todayStr) return false;
+      return WORK_DAYS.includes(new Date(dateStr + 'T12:00:00').getDay());
+    });
+
     const days = [];
+    if (workingDates.length === 0) {
+      return res.status(200).json({ days, timezone: TIMEZONE });
+    }
 
-    for (const dateStr of datesToCheck) {
-      if (dateStr < todayStr) continue; // skip past dates
+    // Single freebusy call for the entire range (instead of one per day)
+    const rangeStart = toUTC(workingDates[0], WORK_START);
+    const rangeEnd = toUTC(workingDates[workingDates.length - 1], WORK_END);
 
-      const jsDay = new Date(dateStr + 'T12:00:00').getDay();
-      if (!WORK_DAYS.includes(jsDay)) continue;
+    const freebusyResp = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        timeMin: rangeStart.toISOString(),
+        timeMax: rangeEnd.toISOString(),
+        timeZone: TIMEZONE,
+        items: [{ id: CALENDAR_ID }],
+      }),
+    });
 
-      const toUTC = (localDateStr, hour) => {
-        const d = new Date(`${localDateStr}T${String(hour).padStart(2,'0')}:00:00`);
-        const tzOffset = new Date(d.toLocaleString('en-US', { timeZone: TIMEZONE })).getTime() - new Date(d.toLocaleString('en-US', { timeZone: 'UTC' })).getTime();
-        return new Date(d.getTime() - tzOffset);
-      };
+    const freebusyData = await freebusyResp.json();
+    const busy = freebusyData.calendars?.[CALENDAR_ID]?.busy || [];
 
+    // Compute available slots per day from the single busy response
+    for (const dateStr of workingDates) {
       const startUTC = toUTC(dateStr, WORK_START);
       const endUTC = toUTC(dateStr, WORK_END);
-
-      const freebusyResp = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          timeMin: startUTC.toISOString(),
-          timeMax: endUTC.toISOString(),
-          timeZone: TIMEZONE,
-          items: [{ id: CALENDAR_ID }],
-        }),
-      });
-
-      const freebusyData = await freebusyResp.json();
-      const busy = freebusyData.calendars?.[CALENDAR_ID]?.busy || [];
 
       const daySlots = [];
       let cur = new Date(startUTC);
@@ -67,7 +76,7 @@ export default async function handler(req, res) {
       while (cur < endUTC) {
         const slotEnd = new Date(cur.getTime() + SLOT_DURATION * 60000);
         if (slotEnd > endUTC) break;
-        const isBusy = busy.some((b) => new Date(b.start) < slotEnd && new Date(b.end) > cur);
+        const isBusy = busy.some(b => new Date(b.start) < slotEnd && new Date(b.end) > cur);
         if (!isBusy) daySlots.push({ start: cur.toISOString(), end: slotEnd.toISOString() });
         cur = slotEnd;
       }
