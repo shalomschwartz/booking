@@ -6,6 +6,7 @@ Step-by-step instructions for deploying a new client instance.
 ## What you need before you start
 - A GitHub account (you already have this)
 - A Vercel account (you already have this)
+- A Supabase account (free at [supabase.com](https://supabase.com))
 - The client's Google account credentials (they need to be present or do step 3 themselves)
 
 ---
@@ -43,11 +44,46 @@ Step-by-step instructions for deploying a new client instance.
    - Application type: **Web application**
    - Authorized redirect URIs: add `https://YOUR-VERCEL-URL.vercel.app/api/auth/callback`
      (you can get this URL after Step 2 — it looks like `booking-clientname.vercel.app`)
-6. Copy the **Client ID** and **Client Secret** — you'll need them in Step 4
+6. Copy the **Client ID** and **Client Secret** — you'll need them in Step 5
 
 ---
 
-## Step 4 — Add environment variables in Vercel
+## Step 4 — Set up Supabase
+
+1. Go to [supabase.com](https://supabase.com) → **New project**
+2. Give it a name (e.g. `booking-clientname`) and set a database password
+3. Wait for it to finish creating (~1 minute)
+4. Go to **SQL Editor** and run this to create the bookings table:
+
+```sql
+create table bookings (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  email text not null,
+  notes text,
+  start_time timestamptz not null,
+  end_time timestamptz not null,
+  meet_link text,
+  event_id text,
+  created_at timestamptz default now()
+);
+
+alter table bookings enable row level security;
+create policy "service role full access" on bookings
+  using (true) with check (true);
+```
+
+5. Go to **Settings → API** and copy:
+   - **Project URL** → this is your `SUPABASE_URL`
+   - **service_role** key (under "Project API keys") → this is your `SUPABASE_SERVICE_KEY`
+
+6. Create the admin login user:
+   - Go to **Authentication → Users → Add user → Create new user**
+   - Enter the email and password you'll use to log into the dashboard
+
+---
+
+## Step 5 — Add environment variables in Vercel
 
 In your Vercel project → **Settings → Environment Variables**, add all of the following:
 
@@ -55,7 +91,7 @@ In your Vercel project → **Settings → Environment Variables**, add all of th
 |---|---|---|
 | `GOOGLE_CLIENT_ID` | from Step 3 | |
 | `GOOGLE_CLIENT_SECRET` | from Step 3 | |
-| `GOOGLE_REFRESH_TOKEN` | _fill in after Step 5_ | |
+| `GOOGLE_REFRESH_TOKEN` | _fill in after Step 6_ | |
 | `CALENDAR_ID` | `primary` | or a specific calendar ID |
 | `TIMEZONE` | e.g. `America/New_York` | [full list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
 | `WORK_DAYS` | e.g. `1,2,3,4,5` | 0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat |
@@ -63,7 +99,9 @@ In your Vercel project → **Settings → Environment Variables**, add all of th
 | `WORK_END_HOUR` | e.g. `18` | 24-hour format |
 | `SLOT_DURATION_MINS` | e.g. `30` | |
 | `BUSINESS_NAME` | e.g. `John's Consulting` | shown in emails |
-| `ACCENT_COLOR` | e.g. `#1D4ED8` | hex color for email branding |
+| `ACCENT_COLOR` | e.g. `#4F46E5` | hex color for email branding |
+| `SUPABASE_URL` | from Step 4 | server-side only |
+| `SUPABASE_SERVICE_KEY` | from Step 4 | server-side only |
 | `VITE_BUSINESS_NAME` | same as `BUSINESS_NAME` | shown in the UI |
 | `VITE_ACCENT_COLOR` | same as `ACCENT_COLOR` | UI brand color |
 | `VITE_SLOT_DURATION_MINS` | same as `SLOT_DURATION_MINS` | shown in the UI |
@@ -82,7 +120,7 @@ Common work day combos:
 
 ---
 
-## Step 5 — Deploy and connect Google account
+## Step 6 — Deploy and connect Google account
 
 1. Click **Deploy** in Vercel (now that env vars are set)
 2. Wait for deployment to finish
@@ -95,7 +133,7 @@ Common work day combos:
 
 ---
 
-## Step 6 — Test it
+## Step 7 — Test it
 
 1. Open the booking page and make a test booking
 2. Check that:
@@ -103,12 +141,17 @@ Common work day combos:
    - [ ] Booking goes through without errors
    - [ ] A Google Calendar event is created with a Meet link
    - [ ] A confirmation email arrives in the booker's inbox
-3. If something says "Something went wrong", go to Vercel → **Functions** tab → check the logs
+   - [ ] The booking appears in the admin dashboard at `/admin`
+3. Log into the admin dashboard at `https://YOUR-VERCEL-URL.vercel.app/admin`
+   with the email and password from Step 4
+4. If something says "Something went wrong", go to Vercel → **Functions** tab → check the logs
 
 ---
 
 ## Done!
 
 Send the client their booking URL: `https://YOUR-VERCEL-URL.vercel.app`
+
+The admin dashboard is at: `https://YOUR-VERCEL-URL.vercel.app/admin` (keep this private — for your eyes only)
 
 You can also add a custom domain in Vercel → **Settings → Domains** if the client has one.
