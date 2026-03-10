@@ -299,10 +299,6 @@ export default function App() {
 
           {step !== "done" && (
             <div style={s.pageHeader} className="ph">
-              <p style={s.eyebrow}>
-                <span style={s.eyebrowDot} />
-                {t.eyebrow}
-              </p>
               <h1 style={s.pageTitle}>{t.pageTitle}</h1>
               <p style={s.pageSub}>{t.pageSub(CONFIG.SLOT_DURATION)}</p>
             </div>
