@@ -60,6 +60,9 @@ const T = {
     errorSub: "Please contact us directly to book an appointment.",
     min: "min",
     somethingWrong: "Something went wrong, please try again.",
+    morning: "Morning",
+    afternoon: "Afternoon",
+    evening: "Evening",
   },
   he: {
     locale: "he-IL",
@@ -113,6 +116,9 @@ const T = {
     errorSub: "אנא צור איתנו קשר ישירות לקביעת פגישה.",
     min: "דק׳",
     somethingWrong: "משהו השתבש, אנא נסה שוב.",
+    morning: "בוקר",
+    afternoon: "צהריים",
+    evening: "ערב",
   },
 };
 
@@ -125,6 +131,21 @@ const fmtRange = (start, end) => `${fmt24(start)} – ${fmt24(end)}`;
 const fmtDate = (dateStr, locale) => {
   const d = new Date(dateStr + "T12:00:00");
   return d.toLocaleDateString(locale, { weekday: "long", month: "long", day: "numeric" });
+};
+
+const groupByPeriod = (slots, t) => {
+  const groups = [
+    { key: "morning", label: t.morning, slots: [] },
+    { key: "afternoon", label: t.afternoon, slots: [] },
+    { key: "evening", label: t.evening, slots: [] },
+  ];
+  for (const sl of slots) {
+    const h = new Date(sl.start).getHours();
+    if (h < 12) groups[0].slots.push(sl);
+    else if (h < 17) groups[1].slots.push(sl);
+    else groups[2].slots.push(sl);
+  }
+  return groups.filter(g => g.slots.length > 0);
 };
 
 const STEPS = ["pick", "details", "done"];
@@ -441,27 +462,34 @@ export default function App() {
                             </span>
                           )}
                         </div>
-                        <div style={s.timeGrid} className="tg">
-                          {slotsForDate.map((sl, i) => {
-                            const sel = selectedSlot?.start === sl.start;
-                            return (
-                              <div
-                                key={i}
-                                className={`slot-pill${sel ? " slot-selected" : ""}`}
-                                onClick={() => { setSelectedSlot(sl); setNudgeTime(false); setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 80); }}
-                                style={{
-                                  ...s.slotPill,
-                                  background: sel ? CONFIG.ACCENT : "#F9FAFB",
-                                  color: sel ? "#fff" : "#374151",
-                                  border: `1.5px solid ${sel ? CONFIG.ACCENT : "#E5E7EB"}`,
-                                  fontWeight: sel ? 600 : 500,
-                                  direction: "ltr",
-                                }}
-                              >
-                                {fmtRange(sl.start, sl.end)}
+                        <div style={{ padding: "8px 36px 24px" }} className="tg">
+                          {groupByPeriod(slotsForDate, t).map(({ key, label, slots }) => (
+                            <div key={key} style={{ marginBottom: 20 }}>
+                              <div style={s.periodLabel}>{label}</div>
+                              <div style={s.timeGrid}>
+                                {slots.map((sl, i) => {
+                                  const sel = selectedSlot?.start === sl.start;
+                                  return (
+                                    <div
+                                      key={i}
+                                      className={`slot-pill${sel ? " slot-selected" : ""}`}
+                                      onClick={() => { setSelectedSlot(sl); setNudgeTime(false); setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 80); }}
+                                      style={{
+                                        ...s.slotPill,
+                                        background: sel ? CONFIG.ACCENT : "#F9FAFB",
+                                        color: sel ? "#fff" : "#374151",
+                                        border: `1.5px solid ${sel ? CONFIG.ACCENT : "#E5E7EB"}`,
+                                        fontWeight: sel ? 600 : 500,
+                                        direction: "ltr",
+                                      }}
+                                    >
+                                      {fmtRange(sl.start, sl.end)}
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            );
-                          })}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -739,7 +767,8 @@ const globalStyles = `
     .ch { padding: 22px 20px 0 !important; }
     .cf { padding: 8px 20px 28px !important; }
     .dg { padding: 14px 20px !important; gap: 6px !important; }
-    .tg { grid-template-columns: repeat(2, 1fr) !important; padding: 14px 20px !important; }
+    .tg { padding: 8px 20px 20px !important; }
+    .tg .time-grid { grid-template-columns: repeat(2, 1fr) !important; }
     .cal-wrap { padding: 14px 16px 8px !important; }
     .ssl { padding: 12px 16px 4px !important; }
     .sr { padding: 14px 20px 4px !important; }
@@ -795,8 +824,9 @@ const s = {
   dayGrid: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, padding: "24px 36px" },
   dayCard: { display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 6px", borderRadius: 12, gap: 4 },
 
-  timeGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, padding: "24px 36px" },
-  slotPill: { padding: "14px 10px", borderRadius: 10, fontSize: 14, textAlign: "center", letterSpacing: "0.1px" },
+  timeGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 },
+  slotPill: { padding: "16px 10px", borderRadius: 50, fontSize: 14, textAlign: "center", letterSpacing: "0.1px" },
+  periodLabel: { fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 10 },
 
   summaryRow: { display: "flex", gap: 8, padding: "20px 36px 4px", flexWrap: "wrap" },
   summaryChip: { display: "inline-flex", alignItems: "center", gap: 6, background: "#F9FAFB", color: "#374151", border: "1px solid #E5E7EB", borderRadius: 8, padding: "8px 13px", fontSize: 13, fontWeight: 500 },
