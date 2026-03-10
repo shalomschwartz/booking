@@ -5,20 +5,35 @@ export default async function handler(req, res) {
 
   try {
     const accessToken = await getAccessToken();
-    const DAYS_AHEAD = 14;
     const SLOT_DURATION = parseInt(process.env.SLOT_DURATION_MINS || '30');
     const WORK_START = parseInt(process.env.WORK_START_HOUR || '9');
     const WORK_END = parseInt(process.env.WORK_END_HOUR || '18');
     const TIMEZONE = process.env.TIMEZONE || 'Asia/Jerusalem';
     const CALENDAR_ID = process.env.CALENDAR_ID || 'primary';
     const WORK_DAYS = (process.env.WORK_DAYS || '0,1,2,3,4').split(',').map(Number);
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+
+    // Build list of dates to check — either a full month or next 14 days
+    const monthParam = req.query.month; // e.g. "2026-04"
+    const datesToCheck = [];
+    if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
+      const [y, m] = monthParam.split('-').map(Number);
+      const daysInMonth = new Date(y, m, 0).getDate();
+      for (let d = 1; d <= daysInMonth; d++) {
+        datesToCheck.push(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+      }
+    } else {
+      for (let i = 0; i < 14; i++) {
+        const dateObj = new Date();
+        dateObj.setDate(dateObj.getDate() + i);
+        datesToCheck.push(dateObj.toLocaleDateString('en-CA', { timeZone: TIMEZONE }));
+      }
+    }
 
     const days = [];
 
-    for (let i = 0; i < DAYS_AHEAD; i++) {
-      const dateObj = new Date();
-      dateObj.setDate(dateObj.getDate() + i);
-      const dateStr = dateObj.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+    for (const dateStr of datesToCheck) {
+      if (dateStr < todayStr) continue; // skip past dates
 
       const jsDay = new Date(dateStr + 'T12:00:00').getDay();
       if (!WORK_DAYS.includes(jsDay)) continue;

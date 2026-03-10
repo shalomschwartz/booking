@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const CONFIG = {
   BUSINESS_NAME: import.meta.env.VITE_BUSINESS_NAME || "Shalom AI Solutions",
@@ -42,17 +42,27 @@ export default function App() {
   const [booking, setBooking] = useState(null);
   const [nudgeTime, setNudgeTime] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
+  const monthCacheRef = useRef({});
 
   useEffect(() => {
-    fetch("/api/availability")
+    const monthStr = `${currentMonth.year}-${String(currentMonth.month + 1).padStart(2, '0')}`;
+    if (monthCacheRef.current[monthStr]) {
+      setAvailability(monthCacheRef.current[monthStr]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setAvailability(null);
+    fetch(`/api/availability?month=${monthStr}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.error) throw new Error(data.error);
+        monthCacheRef.current[monthStr] = data;
         setAvailability(data);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [currentMonth]);
 
   const goTo = (nextStep) => {
     setAnimating(true);
