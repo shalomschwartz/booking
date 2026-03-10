@@ -43,6 +43,7 @@ export default function App() {
   const [nudgeTime, setNudgeTime] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
   const monthCacheRef = useRef({});
+  const continueRef = useRef(null);
 
   useEffect(() => {
     const monthStr = `${currentMonth.year}-${String(currentMonth.month + 1).padStart(2, '0')}`;
@@ -343,7 +344,7 @@ export default function App() {
                               <div
                                 key={i}
                                 className={`slot-pill${sel ? " slot-selected" : ""}`}
-                                onClick={() => { setSelectedSlot(sl); setNudgeTime(false); }}
+                                onClick={() => { setSelectedSlot(sl); setNudgeTime(false); setTimeout(() => continueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80); }}
                                 style={{
                                   ...s.slotPill,
                                   background: sel ? CONFIG.ACCENT : "#F9FAFB",
@@ -367,6 +368,7 @@ export default function App() {
                     <p style={s.nudgeMsg}>{selectedDate ? "Please select a time to continue" : "Please select a date first"}</p>
                   )}
                   <div
+                    ref={continueRef}
                     onMouseEnter={() => { if (!selectedSlot) setNudgeTime(true); }}
                     onMouseLeave={() => setNudgeTime(false)}
                   >
