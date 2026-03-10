@@ -649,7 +649,17 @@ export default function App() {
                   {booking?.meetLink && (
                     <div style={{ ...s.confirmRow, borderBottom: "none" }}>
                       <span style={s.confirmLabel}>{t.labelMeetLink}</span>
-                      <a href={booking.meetLink} target="_blank" rel="noreferrer" style={s.meetLink}>
+                      <a href={booking.meetLink} target="_blank" rel="noreferrer" style={{ ...s.meetLink, display: "inline-flex", alignItems: "center", gap: 7 }}>
+                        <svg width="18" height="18" viewBox="0 0 87.5 72" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M51.1 36v-8.2L63.4 16l4.3 8.3v23.6l-4.3 8-12.3-11.7z" fill="#00832d"/>
+                          <path d="M0 51.5V62c0 3.3 2.7 6 6 6h10.5l2.2-11.2-2.2-10.3H6c-3.3 0-6 2.7-6 6z" fill="#0066da"/>
+                          <path d="M16.5 6L0 20.5v9.8h16.5l2.3-9.9z" fill="#e94235"/>
+                          <path d="M16.5 6h35l5 14.4-5 9.9h-35V6z" fill="#2684fc"/>
+                          <path d="M16.5 30.3v21.2h35V30.3z" fill="#00ac47"/>
+                          <path d="M51.5 6l11.9 14.4v23.4L51.5 57.5v-27z" fill="#00832d"/>
+                          <path d="M51.5 57.5h-35l-2.2 7L16.5 68h35c3.3 0 6-2.7 6-6v-4.5z" fill="#0066da"/>
+                          <path d="M16.5 68H6c-3.3 0-6-2.7-6-6v-10.5h16.5V68z" fill="#2684fc" opacity=".5"/>
+                        </svg>
                         {t.joinMeet}
                       </a>
                     </div>
