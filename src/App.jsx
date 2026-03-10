@@ -727,7 +727,7 @@ const globalStyles = `
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
-  textarea:-webkit-autofill { -webkit-box-shadow: 0 0 0px 1000px #fff inset !important; -webkit-text-fill-color: #111827 !important; }
+  textarea:-webkit-autofill { -webkit-box-shadow: 0 0 0px 1000px #F9FAFB inset !important; -webkit-text-fill-color: #111827 !important; }
 
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
@@ -839,7 +839,7 @@ const s = {
   formGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: "16px 36px 8px" },
   field: { display: "flex", flexDirection: "column", gap: 6 },
   label: { fontSize: 13, fontWeight: 600, color: "#374151" },
-  input: { padding: "12px 14px", background: "#F9FAFB", border: "1.5px solid #E5E7EB", borderRadius: 10, color: CONFIG.ACCENT, fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 400, transition: "all 0.15s" },
+  input: { padding: "12px 14px", background: "#F9FAFB", border: "1.5px solid #E5E7EB", borderRadius: 10, color: "#111827", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 400, transition: "all 0.15s" },
   inputErr: { borderColor: "#EF4444", background: "#FFF8F8" },
   errMsg: { fontSize: 12, color: "#EF4444", fontWeight: 500 },
   inputHint: { fontSize: 12, color: "#9CA3AF" },
