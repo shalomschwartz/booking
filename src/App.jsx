@@ -4,6 +4,7 @@ const CONFIG = {
   BUSINESS_NAME: import.meta.env.VITE_BUSINESS_NAME || "Shalom AI Solutions",
   OWNER_NAME: import.meta.env.VITE_OWNER_NAME || "Your Name",
   SLOT_DURATION: parseInt(import.meta.env.VITE_SLOT_DURATION_MINS || "30"),
+  ACCENT: import.meta.env.VITE_ACCENT_COLOR || '#111827',
 };
 
 const pad = (n) => String(n).padStart(2, "0");
@@ -135,8 +136,8 @@ export default function App() {
                 <div key={label} style={s.stepperItem}>
                   <div style={{
                     ...s.stepperCircle,
-                    background: stepNum > i ? "#111827" : stepNum === i ? "#111827" : "transparent",
-                    border: `2px solid ${stepNum >= i ? "#111827" : "#D1D5DB"}`,
+                    background: stepNum > i ? CONFIG.ACCENT : stepNum === i ? CONFIG.ACCENT : "transparent",
+                    border: `2px solid ${stepNum >= i ? CONFIG.ACCENT : "#D1D5DB"}`,
                     color: stepNum >= i ? "#fff" : "#9CA3AF",
                   }}>
                     {stepNum > i ? (
@@ -148,7 +149,7 @@ export default function App() {
                   <span style={{
                     fontSize: 13,
                     fontWeight: stepNum === i ? 600 : 400,
-                    color: stepNum >= i ? "#111827" : "#9CA3AF",
+                    color: stepNum >= i ? CONFIG.ACCENT : "#9CA3AF",
                     whiteSpace: "nowrap",
                   }}>
                     {label}
@@ -157,7 +158,7 @@ export default function App() {
                     <div style={{
                       flex: 1,
                       height: 1,
-                      background: stepNum > i ? "#111827" : "#E5E7EB",
+                      background: stepNum > i ? CONFIG.ACCENT : "#E5E7EB",
                       minWidth: 24,
                       maxWidth: 56,
                     }} />
@@ -205,12 +206,12 @@ export default function App() {
                             onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); setNudgeDate(false); }}
                             style={{
                               ...s.dayCard,
-                              background: sel ? "#111827" : "#fff",
-                              border: `1.5px solid ${sel ? "#111827" : "#E5E7EB"}`,
+                              background: sel ? CONFIG.ACCENT : "#fff",
+                              border: `1.5px solid ${sel ? CONFIG.ACCENT : "#E5E7EB"}`,
                             }}
                           >
                             <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1px", color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{wk}</span>
-                            <span style={{ fontSize: 24, fontWeight: 700, color: sel ? "#fff" : "#111827", lineHeight: 1.1 }}>{day}</span>
+                            <span style={{ fontSize: 24, fontWeight: 700, color: sel ? "#fff" : CONFIG.ACCENT, lineHeight: 1.1 }}>{day}</span>
                             <span style={{ fontSize: 10, fontWeight: 500, color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{mon}</span>
                           </div>
                         );
@@ -269,9 +270,9 @@ export default function App() {
                         onClick={() => { setSelectedSlot(sl); setNudgeTime(false); }}
                         style={{
                           ...s.slotPill,
-                          background: sel ? "#111827" : "#F9FAFB",
+                          background: sel ? CONFIG.ACCENT : "#F9FAFB",
                           color: sel ? "#fff" : "#374151",
-                          border: `1.5px solid ${sel ? "#111827" : "#E5E7EB"}`,
+                          border: `1.5px solid ${sel ? CONFIG.ACCENT : "#E5E7EB"}`,
                           fontWeight: sel ? 600 : 500,
                         }}
                       >
@@ -528,7 +529,7 @@ const globalStyles = `
 
   input:focus, textarea:focus {
     outline: none !important;
-    border-color: #111827 !important;
+    border-color: ${CONFIG.ACCENT} !important;
     box-shadow: 0 0 0 3px rgba(17,24,39,0.08) !important;
     background: #fff !important;
   }
@@ -539,8 +540,8 @@ const s = {
   page: { minHeight: "100vh", background: "#F3F4F6", fontFamily: "'Inter', sans-serif" },
   nav: { position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)", borderBottom: "1px solid #E5E7EB" },
   navInner: { maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center" },
-  navLogo: { width: 32, height: 32, borderRadius: 8, background: "#111827", display: "flex", alignItems: "center", justifyContent: "center" },
-  navBrand: { fontSize: 15, fontWeight: 600, color: "#111827", letterSpacing: "-0.2px" },
+  navLogo: { width: 32, height: 32, borderRadius: 8, background: CONFIG.ACCENT, display: "flex", alignItems: "center", justifyContent: "center" },
+  navBrand: { fontSize: 15, fontWeight: 600, color: CONFIG.ACCENT, letterSpacing: "-0.2px" },
 
   main: { padding: "52px 16px 80px" },
   container: { maxWidth: 600, margin: "0 auto" },
@@ -552,13 +553,13 @@ const s = {
   centerWrap: { display: "flex", justifyContent: "center", paddingTop: 80 },
   errorCard: { background: "#fff", borderRadius: 20, padding: "52px 44px", textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.06)", maxWidth: 400 },
   errorIcon: { width: 52, height: 52, borderRadius: "50%", background: "#FEF2F2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" },
-  errorTitle: { fontSize: 19, fontWeight: 700, color: "#111827", marginBottom: 10 },
+  errorTitle: { fontSize: 19, fontWeight: 700, color: CONFIG.ACCENT, marginBottom: 10 },
   errorSub: { fontSize: 15, color: "#6B7280", lineHeight: 1.7 },
 
   pageHeader: { textAlign: "center", marginBottom: 32 },
   eyebrow: { display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: 14 },
   eyebrowDot: { width: 6, height: 6, borderRadius: "50%", background: "#22C55E", display: "inline-block" },
-  pageTitle: { fontSize: 34, fontWeight: 700, color: "#111827", letterSpacing: "-0.7px", marginBottom: 10, lineHeight: 1.15 },
+  pageTitle: { fontSize: 34, fontWeight: 700, color: CONFIG.ACCENT, letterSpacing: "-0.7px", marginBottom: 10, lineHeight: 1.15 },
   pageSub: { fontSize: 15, color: "#6B7280", fontWeight: 400 },
 
   stepperWrap: { display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 28, flexWrap: "wrap" },
@@ -567,7 +568,7 @@ const s = {
 
   card: { background: "#fff", borderRadius: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 8px 40px rgba(0,0,0,0.06)", overflow: "hidden" },
   cardHeader: { padding: "36px 36px 0" },
-  cardTitle: { fontSize: 20, fontWeight: 700, color: "#111827", marginBottom: 4, letterSpacing: "-0.3px" },
+  cardTitle: { fontSize: 20, fontWeight: 700, color: CONFIG.ACCENT, marginBottom: 4, letterSpacing: "-0.3px" },
   cardSub: { fontSize: 14, color: "#6B7280", fontWeight: 400, lineHeight: 1.5 },
   cardFooter: { padding: "8px 36px 36px", display: "flex", flexDirection: "column", gap: 12 },
 
@@ -583,12 +584,12 @@ const s = {
   formGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: "16px 36px 8px" },
   field: { display: "flex", flexDirection: "column", gap: 6 },
   label: { fontSize: 13, fontWeight: 600, color: "#374151" },
-  input: { padding: "12px 14px", background: "#F9FAFB", border: "1.5px solid #E5E7EB", borderRadius: 10, color: "#111827", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 400, transition: "all 0.15s" },
+  input: { padding: "12px 14px", background: "#F9FAFB", border: "1.5px solid #E5E7EB", borderRadius: 10, color: CONFIG.ACCENT, fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 400, transition: "all 0.15s" },
   inputErr: { borderColor: "#EF4444", background: "#FFF8F8" },
   errMsg: { fontSize: 12, color: "#EF4444", fontWeight: 500 },
   inputHint: { fontSize: 12, color: "#9CA3AF" },
 
-  btnPrimary: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "15px 24px", background: "#111827", color: "#fff", border: "none", borderRadius: 10, fontSize: 15, fontWeight: 600, fontFamily: "'Inter', sans-serif", boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 4px 16px rgba(17,24,39,0.16)", letterSpacing: "-0.1px" },
+  btnPrimary: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "15px 24px", background: CONFIG.ACCENT, color: "#fff", border: "none", borderRadius: 10, fontSize: 15, fontWeight: 600, fontFamily: "'Inter', sans-serif", boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 4px 16px rgba(17,24,39,0.16)", letterSpacing: "-0.1px" },
   btnSpinner: { width: 16, height: 16, border: "2px solid rgba(255,255,255,0.3)", borderTop: "2px solid #fff", borderRadius: "50%", animation: "spin 0.65s linear infinite", display: "inline-block" },
   btnBack: { background: "transparent", border: "none", color: "#6B7280", fontSize: 13, fontWeight: 500, fontFamily: "'Inter', sans-serif", padding: "6px 10px 6px 6px", borderRadius: 6, marginBottom: 18, display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer" },
   btnGhostDark: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "14px 24px", background: "transparent", color: "#374151", border: "1.5px solid #E5E7EB", borderRadius: 10, fontSize: 14, fontWeight: 600, fontFamily: "'Inter', sans-serif" },
@@ -597,16 +598,16 @@ const s = {
   nudgeMsg: { fontSize: 13, color: "#374151", fontWeight: 500, textAlign: "center", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 16px" },
 
   successRing: { width: 88, height: 88, borderRadius: "50%", background: "rgba(17,24,39,0.06)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" },
-  successCircle: { width: 64, height: 64, borderRadius: "50%", background: "#111827", display: "flex", alignItems: "center", justifyContent: "center" },
-  doneTitle: { fontSize: 28, fontWeight: 700, color: "#111827", marginBottom: 10, letterSpacing: "-0.5px" },
+  successCircle: { width: 64, height: 64, borderRadius: "50%", background: CONFIG.ACCENT, display: "flex", alignItems: "center", justifyContent: "center" },
+  doneTitle: { fontSize: 28, fontWeight: 700, color: CONFIG.ACCENT, marginBottom: 10, letterSpacing: "-0.5px" },
   doneSub: { fontSize: 15, color: "#6B7280", marginBottom: 32, lineHeight: 1.6 },
 
   confirmCard: { background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, overflow: "hidden", marginBottom: 16, textAlign: "left" },
   confirmCardHeader: { background: "#F3F4F6", padding: "12px 22px", fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "1px" },
   confirmRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 22px", borderBottom: "1px solid #E5E7EB" },
   confirmLabel: { fontSize: 13, color: "#6B7280", fontWeight: 500 },
-  confirmVal: { fontSize: 14, color: "#111827", fontWeight: 600, textAlign: "right", maxWidth: "60%" },
-  meetLink: { fontSize: 14, fontWeight: 600, color: "#111827", textDecoration: "none", borderBottom: "1.5px solid #111827", paddingBottom: 1 },
+  confirmVal: { fontSize: 14, color: CONFIG.ACCENT, fontWeight: 600, textAlign: "right", maxWidth: "60%" },
+  meetLink: { fontSize: 14, fontWeight: 600, color: CONFIG.ACCENT, textDecoration: "none", borderBottom: "1.5px solid #111827", paddingBottom: 1 },
 
   emailBanner: { background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "13px 18px", marginBottom: 20, fontSize: 13, color: "#166534", fontWeight: 500, lineHeight: 1.6 },
   emptyBox: { background: "#F9FAFB", border: "1.5px dashed #E5E7EB", borderRadius: 12, padding: "32px", fontSize: 14, color: "#9CA3AF", textAlign: "center", margin: "0 36px 24px", lineHeight: 1.7 },

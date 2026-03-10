@@ -11,6 +11,7 @@ export default async function handler(req, res) {
     const WORK_END = parseInt(process.env.WORK_END_HOUR || '18');
     const TIMEZONE = process.env.TIMEZONE || 'Asia/Jerusalem';
     const CALENDAR_ID = process.env.CALENDAR_ID || 'primary';
+    const WORK_DAYS = (process.env.WORK_DAYS || '0,1,2,3,4').split(',').map(Number);
 
     const days = [];
 
@@ -20,7 +21,7 @@ export default async function handler(req, res) {
       const dateStr = dateObj.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
 
       const jsDay = new Date(dateStr + 'T12:00:00').getDay();
-      if (jsDay === 5 || jsDay === 6) continue;
+      if (!WORK_DAYS.includes(jsDay)) continue;
 
       const toUTC = (localDateStr, hour) => {
         const d = new Date(`${localDateStr}T${String(hour).padStart(2,'0')}:00:00`);

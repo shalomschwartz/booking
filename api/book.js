@@ -58,6 +58,7 @@ export default async function handler(req, res) {
 
 async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration, businessName }) {
   const tz = process.env.TIMEZONE || 'Asia/Jerusalem';
+  const accent = process.env.ACCENT_COLOR || '${accent}';
   const startDate = new Date(start);
   const endDate = new Date(end);
   const dateStr = startDate.toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -81,7 +82,7 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
             <td align="center" style="padding-bottom:28px;">
               <table cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#111827;border-radius:10px;padding:10px 14px;">
+                  <td style="background:${accent};border-radius:10px;padding:10px 14px;">
                     <span style="color:#fff;font-size:15px;font-weight:600;letter-spacing:-0.2px;">${businessName}</span>
                   </td>
                 </tr>
@@ -96,7 +97,7 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
               <!-- Top accent bar -->
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#111827;height:4px;"></td>
+                  <td style="background:${accent};height:4px;"></td>
                 </tr>
               </table>
 
@@ -108,16 +109,16 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
                     <!-- Checkmark -->
                     <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                       <tr>
-                        <td style="background:#111827;border-radius:50%;width:56px;height:56px;text-align:center;vertical-align:middle;">
+                        <td style="background:${accent};border-radius:50%;width:56px;height:56px;text-align:center;vertical-align:middle;">
                           <span style="color:#fff;font-size:26px;line-height:56px;">✓</span>
                         </td>
                       </tr>
                     </table>
 
                     <!-- Title -->
-                    <p style="margin:0 0 6px;font-size:26px;font-weight:700;color:#111827;letter-spacing:-0.5px;">You're booked!</p>
+                    <p style="margin:0 0 6px;font-size:26px;font-weight:700;color:${accent};letter-spacing:-0.5px;">You're booked!</p>
                     <p style="margin:0 0 36px;font-size:15px;color:#6B7280;line-height:1.6;">
-                      Hi <strong style="color:#111827;">${name}</strong>, your appointment with ${businessName} has been confirmed.
+                      Hi <strong style="color:${accent};">${name}</strong>, your appointment with ${businessName} has been confirmed.
                     </p>
 
                     <!-- Details box -->
@@ -133,32 +134,32 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
                             <tr>
                               <td style="padding:14px 0;border-bottom:1px solid #E5E7EB;">
                                 <span style="font-size:13px;color:#6B7280;font-weight:500;">Date</span><br/>
-                                <span style="font-size:15px;color:#111827;font-weight:600;">${dateStr}</span>
+                                <span style="font-size:15px;color:${accent};font-weight:600;">${dateStr}</span>
                               </td>
                             </tr>
                             <tr>
                               <td style="padding:14px 0;border-bottom:1px solid #E5E7EB;">
                                 <span style="font-size:13px;color:#6B7280;font-weight:500;">Time</span><br/>
-                                <span style="font-size:15px;color:#111827;font-weight:600;">${timeStr} (${slotDuration} min)</span>
+                                <span style="font-size:15px;color:${accent};font-weight:600;">${timeStr} (${slotDuration} min)</span>
                               </td>
                             </tr>
                             <tr>
                               <td style="padding:14px 0;border-bottom:1px solid #E5E7EB;">
                                 <span style="font-size:13px;color:#6B7280;font-weight:500;">Name</span><br/>
-                                <span style="font-size:15px;color:#111827;font-weight:600;">${name}</span>
+                                <span style="font-size:15px;color:${accent};font-weight:600;">${name}</span>
                               </td>
                             </tr>
                             <tr>
                               <td style="padding:14px 0;${meetLink ? 'border-bottom:1px solid #E5E7EB;' : ''}">
                                 <span style="font-size:13px;color:#6B7280;font-weight:500;">Format</span><br/>
-                                <span style="font-size:15px;color:#111827;font-weight:600;">Video call via Google Meet</span>
+                                <span style="font-size:15px;color:${accent};font-weight:600;">Video call via Google Meet</span>
                               </td>
                             </tr>
                             ${meetLink ? `
                             <tr>
                               <td style="padding:14px 0;">
                                 <span style="font-size:13px;color:#6B7280;font-weight:500;">Meeting link</span><br/>
-                                <a href="${meetLink}" style="font-size:15px;color:#111827;font-weight:600;text-decoration:underline;">${meetLink}</a>
+                                <a href="${meetLink}" style="font-size:15px;color:${accent};font-weight:600;text-decoration:underline;">${meetLink}</a>
                               </td>
                             </tr>` : ''}
                           </table>
@@ -170,7 +171,7 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
                     <!-- CTA Button -->
                     <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                       <tr>
-                        <td style="background:#111827;border-radius:10px;">
+                        <td style="background:${accent};border-radius:10px;">
                           <a href="${meetLink}" style="display:inline-block;padding:14px 28px;color:#fff;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:-0.1px;">
                             Join Google Meet →
                           </a>
