@@ -173,7 +173,6 @@ export default function App() {
   const [submitting, setSubmitting] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [booking, setBooking] = useState(null);
-  const [nudgeTime, setNudgeTime] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
   const monthCacheRef = useRef({});
   const continueRef = useRef(null);
@@ -505,26 +504,24 @@ export default function App() {
                 )}
 
                 <div style={s.cardFooter} className="cf">
-                  {nudgeTime && !selectedSlot && (
-                    <p style={s.nudgeMsg}>{selectedDate ? t.nudgeTime : t.nudgeDate}</p>
-                  )}
-                  <div
-                    ref={continueRef}
-                    onMouseEnter={() => { if (!selectedSlot) setNudgeTime(true); }}
-                    onMouseLeave={() => setNudgeTime(false)}
-                  >
+                  {selectedSlot ? (
                     <button
+                      ref={continueRef}
                       className="btn-primary"
-                      style={{ ...s.btnPrimary, opacity: selectedSlot ? 1 : 0.35 }}
+                      style={s.btnPrimary}
                       disabled={loading}
-                      onClick={() => { if (!selectedSlot) { setNudgeTime(true); return; } goTo("details"); }}
+                      onClick={() => goTo("details")}
                     >
                       {t.continue}
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 8 }}>
                         <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </button>
-                  </div>
+                  ) : (
+                    <div style={s.continueDisabled}>
+                      {selectedDate ? t.nudgeTime : t.nudgeDate}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -854,6 +851,7 @@ const s = {
 
   secureNote: { display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: "#9CA3AF", fontWeight: 400 },
   nudgeMsg: { fontSize: 13, color: "#374151", fontWeight: 500, textAlign: "center", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 16px" },
+  continueDisabled: { width: "100%", padding: "14px 28px", borderRadius: 12, background: "#E5E7EB", color: "#9CA3AF", fontSize: 15, fontWeight: 600, textAlign: "center", cursor: "default", boxSizing: "border-box" },
 
   successRing: { width: 88, height: 88, borderRadius: "50%", background: "rgba(17,24,39,0.06)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" },
   successCircle: { width: 64, height: 64, borderRadius: "50%", background: CONFIG.ACCENT, display: "flex", alignItems: "center", justifyContent: "center" },
