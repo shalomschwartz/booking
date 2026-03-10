@@ -233,23 +233,35 @@ export default function App() {
                     {/* Calendar */}
                     <div style={s.calWrap} className="cal-wrap">
                       <div style={s.monthNav}>
-                        <button
-                          style={{ ...s.calNavBtn, opacity: canPrevMonth ? 1 : 0.3, cursor: canPrevMonth ? "pointer" : "default" }}
-                          onClick={() => canPrevMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M9 2L4 7l5 5" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <button
+                            style={{ ...s.calNavBtn, opacity: canPrevMonth ? 1 : 0.3, cursor: canPrevMonth ? "pointer" : "default" }}
+                            onClick={() => canPrevMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                              <path d="M9 2L4 7l5 5" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                          <button
+                            style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default" }}
+                            onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                              <path d="M5 2l5 5-5 5" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        </div>
                         <span style={s.monthLabel}>{calMonthName}</span>
-                        <button
-                          style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default" }}
-                          onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M5 2l5 5-5 5" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
+                        {canPrevMonth ? (
+                          <button
+                            style={{ ...s.calNavBtn, fontSize: 12, fontWeight: 600, color: "#374151", padding: "0 10px", width: "auto", letterSpacing: "-0.1px" }}
+                            onClick={() => { const n = new Date(); setCurrentMonth({ year: n.getFullYear(), month: n.getMonth() }); }}
+                          >
+                            Today
+                          </button>
+                        ) : (
+                          <div style={{ width: 52 }} />
+                        )}
                       </div>
                       <div style={s.calGrid}>
                         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(h => (
@@ -284,6 +296,17 @@ export default function App() {
                         })}
                       </div>
                     </div>
+
+                    {/* Prompt when no date selected yet */}
+                    {!selectedDate && (
+                      <div style={s.selectDatePrompt} className="ssl">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                          <rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="#9CA3AF" strokeWidth="1.4"/>
+                          <path d="M4.5 1.5v2M9.5 1.5v2M1.5 5.5h11" stroke="#9CA3AF" strokeWidth="1.4" strokeLinecap="round"/>
+                        </svg>
+                        Select a date above to see available times
+                      </div>
+                    )}
 
                     {/* Slots — appear when date is selected */}
                     {selectedDate && (
@@ -665,5 +688,6 @@ const s = {
   calDayHeader: { height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "#9CA3AF", letterSpacing: "0.3px" },
   calCell: { height: 38, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, fontSize: 14, userSelect: "none", position: "relative" },
   slotsSectionTitle: { display: "flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 600, color: "#374151", padding: "16px 36px 4px" },
+  selectDatePrompt: { display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#9CA3AF", padding: "14px 36px 20px", fontWeight: 500 },
   footer: { textAlign: "center", fontSize: 12, color: "#9CA3AF", marginTop: 24 },
 };
