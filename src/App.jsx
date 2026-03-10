@@ -657,7 +657,7 @@ export default function App() {
                 </div>
 
                 <div style={s.emailBanner}>
-                  {t.emailBanner(<strong>{form.email}</strong>)}
+                  {t.emailBanner(form.email)}
                 </div>
 
                 <button
@@ -861,7 +861,7 @@ const s = {
   confirmVal: { fontSize: 14, color: CONFIG.ACCENT, fontWeight: 600, textAlign: "right", maxWidth: "60%" },
   meetLink: { fontSize: 14, fontWeight: 600, color: CONFIG.ACCENT, textDecoration: "none", borderBottom: "1.5px solid #111827", paddingBottom: 1 },
 
-  emailBanner: { background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "13px 18px", marginBottom: 20, fontSize: 13, color: "#166534", fontWeight: 500, lineHeight: 1.6 },
+  emailBanner: { background: hexToRgba(CONFIG.ACCENT, 0.08), border: `1px solid ${hexToRgba(CONFIG.ACCENT, 0.25)}`, borderRadius: 10, padding: "13px 18px", marginBottom: 20, fontSize: 13, color: CONFIG.ACCENT, fontWeight: 500, lineHeight: 1.6 },
   emptyBox: { background: "#F9FAFB", border: "1.5px dashed #E5E7EB", borderRadius: 12, padding: "32px", fontSize: 14, color: "#9CA3AF", textAlign: "center", margin: "0 36px 24px", lineHeight: 1.7 },
 
   calWrap: { padding: "20px 36px 8px" },
