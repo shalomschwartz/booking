@@ -105,8 +105,8 @@ export default function App() {
     calCells.push(`${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
   }
   const calMonthStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
-  const canPrevMonth = allAvailMonths.length > 0 && allAvailMonths[0] < calMonthStr;
-  const canNextMonth = allAvailMonths.length > 0 && allAvailMonths[allAvailMonths.length - 1] > calMonthStr;
+  const canPrevMonth = calMonthStr > todayStr.substring(0, 7);
+  const canNextMonth = true;
   const calMonthName = new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   if (error) return (
