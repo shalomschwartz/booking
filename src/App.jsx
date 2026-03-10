@@ -724,6 +724,10 @@ const globalStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: ${hexToRgba(CONFIG.ACCENT, 0.12)}; }
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill { -webkit-box-shadow: 0 0 0px 1000px #fff inset !important; -webkit-text-fill-color: #111827 !important; }
 
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
