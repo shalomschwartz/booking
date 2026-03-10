@@ -279,6 +279,7 @@ export default function App() {
                               Next →
                             </button>
                           </div>
+                        </div>
                       </div>
                       <div style={s.calGrid}>
                         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(h => (
