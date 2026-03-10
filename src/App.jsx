@@ -418,8 +418,8 @@ export default function App() {
                               onClick={() => { if (clickable) { setSelectedDate(cell); setSelectedSlot(null); } }}
                               style={{
                                 ...s.calCell,
-                                background: isSel ? CONFIG.ACCENT : "transparent",
-                                color: isSel ? "#fff" : isPast || !isAvail ? "#D1D5DB" : "#111827",
+                                background: isSel ? CONFIG.ACCENT : clickable ? `${CONFIG.ACCENT}18` : "transparent",
+                                color: isSel ? "#fff" : isPast || !isAvail ? "#D1D5DB" : CONFIG.ACCENT,
                                 fontWeight: isSel || isToday ? 700 : 500,
                                 cursor: clickable ? "pointer" : "default",
                               }}
@@ -722,7 +722,7 @@ function Nav({ lang, setLang }) {
 const globalStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #F3F4F6; }
+  body { background: ${CONFIG.ACCENT}0D; }
 
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
@@ -786,7 +786,7 @@ const globalStyles = `
 `;
 
 const s = {
-  page: { minHeight: "100vh", background: "#F3F4F6", fontFamily: "'Inter', sans-serif" },
+  page: { minHeight: "100vh", background: `${CONFIG.ACCENT}0D`, fontFamily: "'Inter', sans-serif" },
   nav: { position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)", borderBottom: "1px solid #E5E7EB" },
   navInner: { maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" },
   navLogo: { width: 32, height: 32, borderRadius: 8, background: CONFIG.ACCENT, display: "flex", alignItems: "center", justifyContent: "center" },
