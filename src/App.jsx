@@ -379,7 +379,7 @@ export default function App() {
                           </div>
                         </div>
                       </div>
-                      <div style={s.calGrid}>
+                      <div style={{ ...s.calGrid, direction: "ltr" }}>
                         {t.dayHeaders.map(h => (
                           <div key={h} style={s.calDayHeader}>{h}</div>
                         ))}
@@ -455,6 +455,7 @@ export default function App() {
                                   color: sel ? "#fff" : "#374151",
                                   border: `1.5px solid ${sel ? CONFIG.ACCENT : "#E5E7EB"}`,
                                   fontWeight: sel ? 600 : 500,
+                                  direction: "ltr",
                                 }}
                               >
                                 {fmtRange(sl.start, sl.end)}
@@ -519,7 +520,7 @@ export default function App() {
                       <circle cx="7" cy="7" r="5.5" stroke="#374151" strokeWidth="1.4"/>
                       <path d="M7 4v3l2 1.5" stroke="#374151" strokeWidth="1.4" strokeLinecap="round"/>
                     </svg>
-                    {fmtRange(selectedSlot.start, selectedSlot.end)} · {CONFIG.SLOT_DURATION} {t.min}
+                    <span dir="ltr">{fmtRange(selectedSlot.start, selectedSlot.end)}</span> · {CONFIG.SLOT_DURATION} {t.min}
                   </div>
                 </div>
 
@@ -606,14 +607,14 @@ export default function App() {
                 <div style={s.confirmCard}>
                   <div style={s.confirmCardHeader}>{t.appointmentSummary}</div>
                   {[
-                    { label: t.labelDate, val: fmtDate(selectedDate, t.locale) },
-                    { label: t.labelTime, val: `${fmtRange(selectedSlot.start, selectedSlot.end)} (${CONFIG.SLOT_DURATION} ${t.min})` },
-                    { label: t.labelNameField, val: form.name },
-                    { label: t.labelEmailField, val: form.email },
-                  ].map(({ label, val }) => (
+                    { label: t.labelDate, val: fmtDate(selectedDate, t.locale), ltr: false },
+                    { label: t.labelTime, val: `${fmtRange(selectedSlot.start, selectedSlot.end)} (${CONFIG.SLOT_DURATION} ${t.min})`, ltr: true },
+                    { label: t.labelNameField, val: form.name, ltr: false },
+                    { label: t.labelEmailField, val: form.email, ltr: true },
+                  ].map(({ label, val, ltr }) => (
                     <div key={label} style={s.confirmRow}>
                       <span style={s.confirmLabel}>{label}</span>
-                      <span style={s.confirmVal}>{val}</span>
+                      <span style={s.confirmVal} dir={ltr ? "ltr" : undefined}>{val}</span>
                     </div>
                   ))}
                   {booking?.meetLink && (
