@@ -217,7 +217,7 @@ export default function App() {
 
   const goTo = (nextStep) => {
     setAnimating(true);
-    setTimeout(() => { setStep(nextStep); setAnimating(false); }, 220);
+    setTimeout(() => { setStep(nextStep); setAnimating(false); if (nextStep === "done") window.scrollTo({ top: 0, behavior: 'smooth' }); }, 220);
   };
 
   const slotsForDate = selectedDate
