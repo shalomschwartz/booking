@@ -683,7 +683,7 @@ export default function App() {
 
 function Nav({ lang, setLang }) {
   return (
-    <header style={s.nav}>
+    <header style={s.nav} dir="ltr">
       <div style={s.navInner}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={s.navLogo}>
