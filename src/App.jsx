@@ -26,13 +26,13 @@ const fmtShort = (dateStr) => {
   };
 };
 
-const STEPS = ["date", "time", "details", "done"];
+const STEPS = ["pick", "details", "done"];
 
 export default function App() {
   const [availability, setAvailability] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [step, setStep] = useState("date");
+  const [step, setStep] = useState("pick");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [form, setForm] = useState({ name: "", email: "", notes: "" });
@@ -41,7 +41,7 @@ export default function App() {
   const [animating, setAnimating] = useState(false);
   const [booking, setBooking] = useState(null);
   const [nudgeTime, setNudgeTime] = useState(false);
-  const [nudgeDate, setNudgeDate] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
 
   useEffect(() => {
     fetch("/api/availability")
@@ -93,6 +93,22 @@ export default function App() {
 
   const stepNum = STEPS.indexOf(step);
 
+  const todayStr = new Date().toLocaleDateString('en-CA');
+  const availSet = new Set(availability?.days?.map(d => d.date) || []);
+  const allAvailMonths = [...new Set((availability?.days || []).map(d => d.date.substring(0, 7)))].sort();
+  const calYear = currentMonth.year;
+  const calMonth = currentMonth.month;
+  const calFirstDay = new Date(calYear, calMonth, 1).getDay();
+  const calDaysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const calCells = [...Array(calFirstDay).fill(null)];
+  for (let d = 1; d <= calDaysInMonth; d++) {
+    calCells.push(`${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+  }
+  const calMonthStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+  const canPrevMonth = allAvailMonths.length > 0 && allAvailMonths[0] < calMonthStr;
+  const canNextMonth = allAvailMonths.length > 0 && allAvailMonths[allAvailMonths.length - 1] > calMonthStr;
+  const calMonthName = new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
   if (error) return (
     <div style={s.page}>
       <style>{globalStyles}</style>
@@ -132,7 +148,7 @@ export default function App() {
 
           {step !== "done" && (
             <div style={s.stepperWrap} className="sw">
-              {["Choose date", "Choose time", "Your details"].map((label, i) => (
+              {["Pick a slot", "Your details"].map((label, i) => (
                 <div key={label} style={s.stepperItem}>
                   <div style={{
                     ...s.stepperCircle,
@@ -154,7 +170,7 @@ export default function App() {
                   }}>
                     {label}
                   </span>
-                  {i < 2 && (
+                  {i < 1 && (
                     <div style={{
                       flex: 1,
                       height: 1,
@@ -175,116 +191,120 @@ export default function App() {
             transition: "opacity 0.22s ease, transform 0.22s ease",
           }}>
 
-            {/* DATE */}
-            {step === "date" && (
+            {/* PICK DATE & TIME */}
+            {step === "pick" && (
               <div className="anim">
                 <div style={s.cardHeader} className="ch">
-                  <h2 style={s.cardTitle}>Select a date</h2>
-                  <p style={s.cardSub}>Available days over the next 2 weeks</p>
+                  <h2 style={s.cardTitle}>Select a date & time</h2>
+                  <p style={s.cardSub}>Pick an available date, then choose your slot</p>
                 </div>
+
                 {loading && (
-                  <div style={s.dayGrid} className="dg">
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <div key={i} className="skeleton-card" style={{ ...s.dayCard, background: "#F3F4F6", border: "1.5px solid #F3F4F6", gap: 6 }}>
-                        <div style={{ width: 20, height: 8, borderRadius: 4, background: "#E5E7EB" }} />
-                        <div style={{ width: 28, height: 24, borderRadius: 6, background: "#E5E7EB" }} />
-                        <div style={{ width: 20, height: 8, borderRadius: 4, background: "#E5E7EB" }} />
-                      </div>
-                    ))}
+                  <div style={{ padding: "20px 36px 24px" }}>
+                    <div className="skeleton-card" style={{ height: 290, borderRadius: 12, background: "#F3F4F6" }} />
                   </div>
                 )}
-                {!loading && (
+
+                {!loading && availability.days.length === 0 && (
+                  <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
+                )}
+
+                {!loading && availability.days.length > 0 && (
                   <>
-                    <div style={s.dayGrid} className="dg">
-                      {availability.days.map((d) => {
-                        const sel = selectedDate === d.date;
-                        const { wk, day, mon } = fmtShort(d.date);
-                        return (
-                          <div
-                            key={d.date}
-                            className={`day-card${sel ? " day-selected" : ""}`}
-                            onClick={() => { setSelectedDate(d.date); setSelectedSlot(null); setNudgeDate(false); }}
-                            style={{
-                              ...s.dayCard,
-                              background: sel ? CONFIG.ACCENT : "#fff",
-                              border: `1.5px solid ${sel ? CONFIG.ACCENT : "#E5E7EB"}`,
-                            }}
-                          >
-                            <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1px", color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{wk}</span>
-                            <span style={{ fontSize: 24, fontWeight: 700, color: sel ? "#fff" : CONFIG.ACCENT, lineHeight: 1.1 }}>{day}</span>
-                            <span style={{ fontSize: 10, fontWeight: 500, color: sel ? "rgba(255,255,255,0.55)" : "#9CA3AF" }}>{mon}</span>
-                          </div>
-                        );
-                      })}
+                    {/* Calendar */}
+                    <div style={s.calWrap} className="cal-wrap">
+                      <div style={s.monthNav}>
+                        <button
+                          style={{ ...s.calNavBtn, opacity: canPrevMonth ? 1 : 0.3, cursor: canPrevMonth ? "pointer" : "default" }}
+                          onClick={() => canPrevMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M9 2L4 7l5 5" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                        <span style={s.monthLabel}>{calMonthName}</span>
+                        <button
+                          style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default" }}
+                          onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M5 2l5 5-5 5" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <div style={s.calGrid}>
+                        {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(h => (
+                          <div key={h} style={s.calDayHeader}>{h}</div>
+                        ))}
+                        {calCells.map((cell, i) => {
+                          if (!cell) return <div key={`e${i}`} />;
+                          const isAvail = availSet.has(cell);
+                          const isPast = cell < todayStr;
+                          const isSel = selectedDate === cell;
+                          const isToday = cell === todayStr;
+                          const clickable = isAvail && !isPast;
+                          return (
+                            <div
+                              key={cell}
+                              className={clickable ? "cal-day" : ""}
+                              onClick={() => { if (clickable) { setSelectedDate(cell); setSelectedSlot(null); } }}
+                              style={{
+                                ...s.calCell,
+                                background: isSel ? CONFIG.ACCENT : "transparent",
+                                color: isSel ? "#fff" : isPast || !isAvail ? "#D1D5DB" : "#111827",
+                                fontWeight: isSel || isToday ? 700 : 500,
+                                cursor: clickable ? "pointer" : "default",
+                              }}
+                            >
+                              {parseInt(cell.split('-')[2])}
+                              {isToday && !isSel && (
+                                <span style={{ position: "absolute", bottom: 2, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: "50%", background: CONFIG.ACCENT }} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    {availability.days.length === 0 && (
-                      <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
+
+                    {/* Slots — appear when date is selected */}
+                    {selectedDate && (
+                      <div className="anim">
+                        <div style={s.slotsSectionTitle} className="ssl">
+                          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                            <circle cx="7" cy="7" r="5.5" stroke={CONFIG.ACCENT} strokeWidth="1.4"/>
+                            <path d="M7 4v3l2 1.5" stroke={CONFIG.ACCENT} strokeWidth="1.4" strokeLinecap="round"/>
+                          </svg>
+                          {fmtDate(selectedDate)} — available times
+                        </div>
+                        <div style={s.timeGrid} className="tg">
+                          {slotsForDate.map((sl, i) => {
+                            const sel = selectedSlot?.start === sl.start;
+                            return (
+                              <div
+                                key={i}
+                                className={`slot-pill${sel ? " slot-selected" : ""}`}
+                                onClick={() => { setSelectedSlot(sl); setNudgeTime(false); }}
+                                style={{
+                                  ...s.slotPill,
+                                  background: sel ? CONFIG.ACCENT : "#F9FAFB",
+                                  color: sel ? "#fff" : "#374151",
+                                  border: `1.5px solid ${sel ? CONFIG.ACCENT : "#E5E7EB"}`,
+                                  fontWeight: sel ? 600 : 500,
+                                }}
+                              >
+                                {fmtRange(sl.start, sl.end)}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     )}
                   </>
                 )}
-                <div style={s.cardFooter} className="cf">
-                  {nudgeDate && !selectedDate && (
-                    <p style={s.nudgeMsg}>Please select a date to continue</p>
-                  )}
-                  <div
-                    onMouseEnter={() => { if (!selectedDate) setNudgeDate(true); }}
-                    onMouseLeave={() => setNudgeDate(false)}
-                  >
-                    <button
-                      className="btn-primary"
-                      style={{ ...s.btnPrimary, opacity: selectedDate ? 1 : 0.35 }}
-                      disabled={loading}
-                      onClick={() => { if (!selectedDate) { setNudgeDate(true); return; } goTo("time"); }}
-                    >
-                      Continue
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 8 }}>
-                        <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TIME */}
-            {step === "time" && (
-              <div className="anim">
-                <div style={s.cardHeader} className="ch">
-                  <button className="btn-back" style={s.btnBack} onClick={() => goTo("date")}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    Back
-                  </button>
-                  <h2 style={s.cardTitle}>Select a time</h2>
-                  <p style={s.cardSub}>{fmtDate(selectedDate)} · {CONFIG.SLOT_DURATION}-minute sessions</p>
-                </div>
-
-                <div style={s.timeGrid} className="tg">
-                  {slotsForDate.map((sl, i) => {
-                    const sel = selectedSlot?.start === sl.start;
-                    return (
-                      <div
-                        key={i}
-                        className={`slot-pill${sel ? " slot-selected" : ""}`}
-                        onClick={() => { setSelectedSlot(sl); setNudgeTime(false); }}
-                        style={{
-                          ...s.slotPill,
-                          background: sel ? CONFIG.ACCENT : "#F9FAFB",
-                          color: sel ? "#fff" : "#374151",
-                          border: `1.5px solid ${sel ? CONFIG.ACCENT : "#E5E7EB"}`,
-                          fontWeight: sel ? 600 : 500,
-                        }}
-                      >
-                        {fmtRange(sl.start, sl.end)}
-                      </div>
-                    );
-                  })}
-                </div>
 
                 <div style={s.cardFooter} className="cf">
                   {nudgeTime && !selectedSlot && (
-                    <p style={s.nudgeMsg}>Please select a time to continue</p>
+                    <p style={s.nudgeMsg}>{selectedDate ? "Please select a time to continue" : "Please select a date first"}</p>
                   )}
                   <div
                     onMouseEnter={() => { if (!selectedSlot) setNudgeTime(true); }}
@@ -293,6 +313,7 @@ export default function App() {
                     <button
                       className="btn-primary"
                       style={{ ...s.btnPrimary, opacity: selectedSlot ? 1 : 0.35 }}
+                      disabled={loading}
                       onClick={() => { if (!selectedSlot) { setNudgeTime(true); return; } goTo("details"); }}
                     >
                       Continue
@@ -309,7 +330,7 @@ export default function App() {
             {step === "details" && (
               <div className="anim">
                 <div style={s.cardHeader} className="ch">
-                  <button className="btn-back" style={s.btnBack} onClick={() => goTo("time")}>
+                  <button className="btn-back" style={s.btnBack} onClick={() => goTo("pick")}>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -446,7 +467,7 @@ export default function App() {
                 <button
                   className="btn-ghost-dark"
                   style={s.btnGhostDark}
-                  onClick={() => { setStep("date"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}
+                  onClick={() => { setStep("pick"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}
                 >
                   Schedule another appointment
                 </button>
@@ -512,6 +533,9 @@ const globalStyles = `
   .btn-ghost-dark { transition: background 0.15s, color 0.15s !important; cursor: pointer; }
   .btn-ghost-dark:hover { background: #F3F4F6 !important; }
 
+  .cal-day { transition: background 0.1s, color 0.1s !important; border-radius: 8px; }
+  .cal-day:hover { background: #F3F4F6 !important; }
+
   @media (max-width: 600px) {
     .ph { margin-bottom: 20px !important; }
     .ph h1 { font-size: 24px !important; }
@@ -522,6 +546,8 @@ const globalStyles = `
     .cf { padding: 8px 20px 28px !important; }
     .dg { padding: 14px 20px !important; gap: 6px !important; }
     .tg { grid-template-columns: repeat(2, 1fr) !important; padding: 14px 20px !important; }
+    .cal-wrap { padding: 14px 16px 8px !important; }
+    .ssl { padding: 12px 16px 4px !important; }
     .sr { padding: 14px 20px 4px !important; }
     .fg { grid-template-columns: 1fr !important; padding: 14px 20px 8px !important; }
     .dp { padding: 36px 20px !important; }
@@ -611,5 +637,14 @@ const s = {
 
   emailBanner: { background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "13px 18px", marginBottom: 20, fontSize: 13, color: "#166534", fontWeight: 500, lineHeight: 1.6 },
   emptyBox: { background: "#F9FAFB", border: "1.5px dashed #E5E7EB", borderRadius: 12, padding: "32px", fontSize: 14, color: "#9CA3AF", textAlign: "center", margin: "0 36px 24px", lineHeight: 1.7 },
+
+  calWrap: { padding: "20px 36px 8px" },
+  monthNav: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 },
+  monthLabel: { fontSize: 15, fontWeight: 700, color: "#111827", letterSpacing: "-0.2px" },
+  calNavBtn: { width: 32, height: 32, borderRadius: 8, background: "#F9FAFB", border: "1.5px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, fontFamily: "'Inter', sans-serif", cursor: "pointer" },
+  calGrid: { display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 3 },
+  calDayHeader: { height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "#9CA3AF", letterSpacing: "0.3px" },
+  calCell: { height: 38, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, fontSize: 14, userSelect: "none", position: "relative" },
+  slotsSectionTitle: { display: "flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 600, color: "#374151", padding: "16px 36px 4px" },
   footer: { textAlign: "center", fontSize: 12, color: "#9CA3AF", marginTop: 24 },
 };
