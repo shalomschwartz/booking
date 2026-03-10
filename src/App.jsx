@@ -46,8 +46,17 @@ export default function App() {
 
   useEffect(() => {
     const monthStr = `${currentMonth.year}-${String(currentMonth.month + 1).padStart(2, '0')}`;
+    const autoSelect = (data) => {
+      const firstAvail = data.days[0]?.date;
+      if (firstAvail && (!selectedDate || !selectedDate.startsWith(monthStr))) {
+        setSelectedDate(firstAvail);
+        setSelectedSlot(null);
+      }
+    };
+
     if (monthCacheRef.current[monthStr]) {
       setAvailability(monthCacheRef.current[monthStr]);
+      autoSelect(monthCacheRef.current[monthStr]);
       setLoading(false);
       return;
     }
@@ -59,6 +68,7 @@ export default function App() {
         if (data.error) throw new Error(data.error);
         monthCacheRef.current[monthStr] = data;
         setAvailability(data);
+        autoSelect(data);
         // Silently prefetch next month in the background
         const next = new Date(currentMonth.year, currentMonth.month + 1, 1);
         const nextStr = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
