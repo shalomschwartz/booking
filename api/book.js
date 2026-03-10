@@ -66,7 +66,11 @@ export default async function handler(req, res) {
     await sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
 
     if (phone) {
-      await sendWhatsApp({ name, phone, start, end, meetLink });
+      try {
+        await sendWhatsApp({ name, phone, start, end, meetLink });
+      } catch (waErr) {
+        console.error('WhatsApp send failed:', waErr.message);
+      }
     }
 
     return res.status(200).json({ success: true, eventId: created.id, meetLink });
