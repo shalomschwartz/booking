@@ -68,7 +68,7 @@ const T = {
     locale: "he-IL",
     dayHeaders: ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"],
     eyebrow: "קביעת פגישה",
-    pageTitle: "קבע תור",
+    pageTitle: "קביעת תור",
     pageSub: (dur) => `פגישת ${dur} דקות דרך Google Meet`,
     stepPick: "בחר זמן",
     stepDetails: "פרטים",
