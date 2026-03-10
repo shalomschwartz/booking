@@ -344,7 +344,7 @@ export default function App() {
                               <div
                                 key={i}
                                 className={`slot-pill${sel ? " slot-selected" : ""}`}
-                                onClick={() => { setSelectedSlot(sl); setNudgeTime(false); setTimeout(() => continueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80); }}
+                                onClick={() => { setSelectedSlot(sl); setNudgeTime(false); setTimeout(() => continueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 80); }}
                                 style={{
                                   ...s.slotPill,
                                   background: sel ? CONFIG.ACCENT : "#F9FAFB",
