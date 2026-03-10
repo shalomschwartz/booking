@@ -291,7 +291,7 @@ export default function App() {
                           return (
                             <div
                               key={cell}
-                              className={clickable ? "cal-day" : ""}
+                              className={`${clickable ? "cal-day" : ""}${isSel ? " cal-selected" : ""}`}
                               onClick={() => { if (clickable) { setSelectedDate(cell); setSelectedSlot(null); } }}
                               style={{
                                 ...s.calCell,
@@ -590,7 +590,7 @@ const globalStyles = `
   .btn-ghost-dark:hover { background: #F3F4F6 !important; }
 
   .cal-day { transition: background 0.1s, color 0.1s !important; border-radius: 8px; }
-  .cal-day:hover { background: #F3F4F6 !important; }
+  .cal-day:not(.cal-selected):hover { background: #F3F4F6 !important; }
 
   @media (max-width: 600px) {
     .ph { margin-bottom: 20px !important; }
