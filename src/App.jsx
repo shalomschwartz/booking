@@ -36,6 +36,10 @@ const T = {
     labelEmail: "Email address",
     placeholderEmail: "jane@company.com",
     emailHint: "Confirmation sent here",
+    labelPhone: "WhatsApp number",
+    placeholderPhone: "+1 234 567 8900",
+    phoneHint: "WhatsApp confirmation sent here",
+    errPhone: "Please enter your phone number",
     labelNotes: "Notes",
     optional: "optional",
     placeholderNotes: "Topics to discuss, questions, or anything helpful to know beforehand…",
@@ -92,6 +96,10 @@ const T = {
     labelEmail: "כתובת אימייל",
     placeholderEmail: "israel@example.com",
     emailHint: "אישור יישלח לכתובת זו",
+    labelPhone: "מספר וואטסאפ",
+    placeholderPhone: "+972 50 000 0000",
+    phoneHint: "אישור וואטסאפ יישלח למספר זה",
+    errPhone: "אנא הכנס מספר טלפון",
     labelNotes: "הערות",
     optional: "אופציונלי",
     placeholderNotes: "נושאים לדיון, שאלות, או כל מידע רלוונטי…",
@@ -168,7 +176,7 @@ export default function App() {
   const [step, setStep] = useState("pick");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [form, setForm] = useState({ name: "", email: "", notes: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", notes: "" });
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [animating, setAnimating] = useState(false);
@@ -229,6 +237,7 @@ export default function App() {
     if (!form.name.trim()) errs.name = t.errName;
     if (!form.email.trim()) errs.email = t.errEmail;
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = t.errEmailInvalid;
+    if (!form.phone.trim()) errs.phone = t.errPhone;
     return errs;
   };
 
@@ -240,7 +249,7 @@ export default function App() {
       const resp = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: form.name, email: form.email, notes: form.notes, start: selectedSlot.start, end: selectedSlot.end }),
+        body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone, notes: form.notes, start: selectedSlot.start, end: selectedSlot.end }),
       });
       const data = await resp.json();
       if (!data.success) throw new Error(data.error || "Booking failed");
@@ -586,6 +595,20 @@ export default function App() {
                       : <p style={s.inputHint}>{t.emailHint}</p>
                     }
                   </div>
+                  <div style={s.field}>
+                    <label style={s.label}>{t.labelPhone}</label>
+                    <input
+                      style={{ ...s.input, ...(formErrors.phone ? s.inputErr : {}), direction: "ltr" }}
+                      type="tel"
+                      placeholder={t.placeholderPhone}
+                      value={form.phone}
+                      onChange={(e) => { setForm(f => ({ ...f, phone: e.target.value })); setFormErrors(fe => ({ ...fe, phone: undefined })); }}
+                    />
+                    {formErrors.phone
+                      ? <p style={s.errMsg}>{formErrors.phone}</p>
+                      : <p style={s.inputHint}>{t.phoneHint}</p>
+                    }
+                  </div>
                   <div style={{ ...s.field, gridColumn: "1 / -1" }}>
                     <label style={s.label}>
                       {t.labelNotes}
@@ -670,7 +693,7 @@ export default function App() {
                 <button
                   className="btn-ghost-dark"
                   style={s.btnGhostDark}
-                  onClick={() => { setStep("pick"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}
+                  onClick={() => { setStep("pick"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", phone: "", notes: "" }); setBooking(null); }}
                 >
                   {t.scheduleAnother}
                 </button>

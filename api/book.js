@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { name, email, notes, start, end } = req.body;
+    const { name, email, phone, notes, start, end } = req.body;
     if (!name || !email || !start || !end) return res.status(400).json({ error: 'Missing required fields' });
 
     const accessToken = await getAccessToken();
@@ -59,11 +59,15 @@ export default async function handler(req, res) {
           'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
           'Prefer': 'return=minimal',
         },
-        body: JSON.stringify({ name, email, notes: notes || null, start_time: start, end_time: end, meet_link: meetLink, event_id: created.id }),
+        body: JSON.stringify({ name, email, phone: phone || null, notes: notes || null, start_time: start, end_time: end, meet_link: meetLink, event_id: created.id }),
       });
     }
 
     await sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
+
+    if (phone) {
+      await sendWhatsApp({ name, phone, start, end, meetLink });
+    }
 
     return res.status(200).json({ success: true, eventId: created.id, meetLink });
   } catch (err) {
@@ -241,6 +245,32 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ raw: encoded }),
+  });
+}
+
+async function sendWhatsApp({ name, phone, start, end, meetLink }) {
+  const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+  const TWILIO_API_KEY = process.env.TWILIO_API_KEY;
+  const TWILIO_API_SECRET = process.env.TWILIO_API_SECRET;
+  const TWILIO_WHATSAPP_FROM = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
+  if (!TWILIO_ACCOUNT_SID || !TWILIO_API_KEY || !TWILIO_API_SECRET) return;
+
+  const tz = process.env.TIMEZONE || 'Asia/Jerusalem';
+  const businessName = process.env.BUSINESS_NAME || 'Shalom AI Solutions';
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const dateStr = startDate.toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', month: 'long', day: 'numeric' });
+  const timeStr = `${startDate.toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false })} – ${endDate.toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false })}`;
+
+  const body = `✅ *Booking Confirmed!*\n\nHi ${name}, your appointment with *${businessName}* is confirmed.\n\n📅 *Date:* ${dateStr}\n⏰ *Time:* ${timeStr}${meetLink ? `\n\n📹 *Join Google Meet:*\n${meetLink}` : ''}\n\nSee you soon!`;
+
+  const to = phone.startsWith('whatsapp:') ? phone : `whatsapp:${phone.replace(/\s/g, '')}`;
+  const credentials = Buffer.from(`${TWILIO_API_KEY}:${TWILIO_API_SECRET}`).toString('base64');
+
+  await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': `Basic ${credentials}` },
+    body: new URLSearchParams({ From: TWILIO_WHATSAPP_FROM, To: to, Body: body }),
   });
 }
 
