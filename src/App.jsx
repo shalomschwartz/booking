@@ -7,28 +7,132 @@ const CONFIG = {
   ACCENT: import.meta.env.VITE_ACCENT_COLOR || '#111827',
 };
 
+const T = {
+  en: {
+    locale: "en-US",
+    dayHeaders: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+    eyebrow: "Schedule a session",
+    pageTitle: "Book an Appointment",
+    pageSub: (dur) => `${dur}-minute session via Google Meet`,
+    stepPick: "Pick a slot",
+    stepDetails: "Your details",
+    cardTitlePick: "Select a date & time",
+    cardSubPick: "Pick an available date, then choose your slot",
+    noAvailability: "No availability this month. Please check another month.",
+    prevMonth: "← Prev",
+    nextMonth: "Next →",
+    today: "↩ Today",
+    selectDatePrompt: "Select a date above to see available times",
+    availableTimes: "available times",
+    pickTimeHint: "↓ pick a time",
+    nudgeTime: "Please select a time to continue",
+    nudgeDate: "Please select a date first",
+    continue: "Continue",
+    back: "Back",
+    cardTitleDetails: "Your details",
+    cardSubDetails: "Almost done — just a couple more things",
+    labelName: "Full name",
+    placeholderName: "Jane Smith",
+    labelEmail: "Email address",
+    placeholderEmail: "jane@company.com",
+    emailHint: "Confirmation sent here",
+    labelNotes: "Notes",
+    optional: "optional",
+    placeholderNotes: "Topics to discuss, questions, or anything helpful to know beforehand…",
+    confirmBooking: "Confirm booking",
+    confirming: "Confirming…",
+    secureNote: "Your information is secure and never shared",
+    errName: "Please enter your name",
+    errEmail: "Please enter your email",
+    errEmailInvalid: "Invalid email address",
+    doneTitle: "You're booked!",
+    doneSub: (name, date) => `Looking forward to meeting with you, ${name} on ${date}.`,
+    appointmentSummary: "Appointment Summary",
+    labelDate: "Date",
+    labelTime: "Time",
+    labelNameField: "Name",
+    labelEmailField: "Email",
+    labelMeetLink: "Meeting link",
+    joinMeet: "Join Google Meet →",
+    emailBanner: (email) => `A confirmation email has been sent to ${email}`,
+    scheduleAnother: "Schedule another appointment",
+    errorTitle: "Scheduling Unavailable",
+    errorSub: "Please contact us directly to book an appointment.",
+    min: "min",
+    somethingWrong: "Something went wrong, please try again.",
+  },
+  he: {
+    locale: "he-IL",
+    dayHeaders: ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"],
+    eyebrow: "קביעת פגישה",
+    pageTitle: "קבע תור",
+    pageSub: (dur) => `פגישת ${dur} דקות דרך Google Meet`,
+    stepPick: "בחר זמן",
+    stepDetails: "פרטים",
+    cardTitlePick: "בחר תאריך ושעה",
+    cardSubPick: "בחר תאריך פנוי, ולאחר מכן בחר שעה",
+    noAvailability: "אין זמינות החודש. נסה חודש אחר.",
+    prevMonth: "הקודם →",
+    nextMonth: "← הבא",
+    today: "היום ↩",
+    selectDatePrompt: "בחר תאריך כדי לראות שעות פנויות",
+    availableTimes: "שעות פנויות",
+    pickTimeHint: "↓ בחר שעה",
+    nudgeTime: "אנא בחר שעה להמשך",
+    nudgeDate: "אנא בחר תאריך תחילה",
+    continue: "המשך",
+    back: "חזור",
+    cardTitleDetails: "הפרטים שלך",
+    cardSubDetails: "כמעט סיימנו — עוד כמה פרטים",
+    labelName: "שם מלא",
+    placeholderName: "ישראל ישראלי",
+    labelEmail: "כתובת אימייל",
+    placeholderEmail: "israel@example.com",
+    emailHint: "אישור יישלח לכתובת זו",
+    labelNotes: "הערות",
+    optional: "אופציונלי",
+    placeholderNotes: "נושאים לדיון, שאלות, או כל מידע רלוונטי…",
+    confirmBooking: "אשר הזמנה",
+    confirming: "שולח…",
+    secureNote: "המידע שלך מאובטח ולא משותף",
+    errName: "אנא הכנס שם",
+    errEmail: "אנא הכנס כתובת אימייל",
+    errEmailInvalid: "כתובת אימייל לא תקינה",
+    doneTitle: "!נקבע תור",
+    doneSub: (name, date) => `מצפים לפגישה איתך, ${name}, בתאריך ${date}.`,
+    appointmentSummary: "סיכום הפגישה",
+    labelDate: "תאריך",
+    labelTime: "שעה",
+    labelNameField: "שם",
+    labelEmailField: "אימייל",
+    labelMeetLink: "קישור לפגישה",
+    joinMeet: "הצטרף לפגישה ←",
+    emailBanner: (email) => `אישור נשלח לכתובת ${email}`,
+    scheduleAnother: "קבע פגישה נוספת",
+    errorTitle: "לא ניתן לקבוע תור",
+    errorSub: "אנא צור איתנו קשר ישירות לקביעת פגישה.",
+    min: "דק׳",
+    somethingWrong: "משהו השתבש, אנא נסה שוב.",
+  },
+};
+
 const pad = (n) => String(n).padStart(2, "0");
 const fmt24 = (isoString) => {
   const d = new Date(isoString);
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 const fmtRange = (start, end) => `${fmt24(start)} – ${fmt24(end)}`;
-const fmtDate = (dateStr) => {
+const fmtDate = (dateStr, locale) => {
   const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-};
-const fmtShort = (dateStr) => {
-  const d = new Date(dateStr + "T12:00:00");
-  return {
-    wk: d.toLocaleDateString("en-US", { weekday: "short" }),
-    day: d.getDate(),
-    mon: d.toLocaleDateString("en-US", { month: "short" }),
-  };
+  return d.toLocaleDateString(locale, { weekday: "long", month: "long", day: "numeric" });
 };
 
 const STEPS = ["pick", "details", "done"];
 
 export default function App() {
+  const [lang, setLang] = useState("en");
+  const t = T[lang];
+
   const [availability, setAvailability] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -70,7 +174,6 @@ export default function App() {
         monthCacheRef.current[monthStr] = data;
         setAvailability(data);
         autoSelect(data);
-        // Silently prefetch next month in the background
         const next = new Date(currentMonth.year, currentMonth.month + 1, 1);
         const nextStr = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
         if (!monthCacheRef.current[nextStr]) {
@@ -95,9 +198,9 @@ export default function App() {
 
   const validate = () => {
     const errs = {};
-    if (!form.name.trim()) errs.name = "Please enter your name";
-    if (!form.email.trim()) errs.email = "Please enter your email";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = "Invalid email address";
+    if (!form.name.trim()) errs.name = t.errName;
+    if (!form.email.trim()) errs.email = t.errEmail;
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = t.errEmailInvalid;
     return errs;
   };
 
@@ -116,7 +219,7 @@ export default function App() {
       setBooking(data);
       goTo("done");
     } catch (e) {
-      alert("Something went wrong, please try again.");
+      alert(t.somethingWrong);
     }
     setSubmitting(false);
   };
@@ -125,7 +228,6 @@ export default function App() {
 
   const todayStr = new Date().toLocaleDateString('en-CA');
   const availSet = new Set(availability?.days?.map(d => d.date) || []);
-  const allAvailMonths = [...new Set((availability?.days || []).map(d => d.date.substring(0, 7)))].sort();
   const calYear = currentMonth.year;
   const calMonth = currentMonth.month;
   const calFirstDay = new Date(calYear, calMonth, 1).getDay();
@@ -137,12 +239,14 @@ export default function App() {
   const calMonthStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
   const canPrevMonth = calMonthStr > todayStr.substring(0, 7);
   const canNextMonth = true;
-  const calMonthName = new Date(calYear, calMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const calMonthName = new Date(calYear, calMonth, 1).toLocaleDateString(t.locale, { month: 'long', year: 'numeric' });
+
+  const dir = lang === "he" ? "rtl" : "ltr";
 
   if (error) return (
-    <div style={s.page}>
+    <div style={s.page} dir={dir}>
       <style>{globalStyles}</style>
-      <Nav />
+      <Nav lang={lang} setLang={setLang} />
       <div style={s.centerWrap}>
         <div style={s.errorCard}>
           <div style={s.errorIcon}>
@@ -150,17 +254,17 @@ export default function App() {
               <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#DC2626" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <h3 style={s.errorTitle}>Scheduling Unavailable</h3>
-          <p style={s.errorSub}>Please contact us directly to book an appointment.</p>
+          <h3 style={s.errorTitle}>{t.errorTitle}</h3>
+          <p style={s.errorSub}>{t.errorSub}</p>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div style={s.page}>
+    <div style={s.page} dir={dir}>
       <style>{globalStyles}</style>
-      <Nav />
+      <Nav lang={lang} setLang={setLang} />
 
       <main style={s.main}>
         <div style={s.container}>
@@ -169,16 +273,16 @@ export default function App() {
             <div style={s.pageHeader} className="ph">
               <p style={s.eyebrow}>
                 <span style={s.eyebrowDot} />
-                Schedule a session
+                {t.eyebrow}
               </p>
-              <h1 style={s.pageTitle}>Book an Appointment</h1>
-              <p style={s.pageSub}>{CONFIG.SLOT_DURATION}-minute session via Google Meet</p>
+              <h1 style={s.pageTitle}>{t.pageTitle}</h1>
+              <p style={s.pageSub}>{t.pageSub(CONFIG.SLOT_DURATION)}</p>
             </div>
           )}
 
           {step !== "done" && (
             <div style={s.stepperWrap} className="sw">
-              {["Pick a slot", "Your details"].map((label, i) => (
+              {[t.stepPick, t.stepDetails].map((label, i) => (
                 <div key={label} style={s.stepperItem}>
                   <div style={{
                     ...s.stepperCircle,
@@ -225,8 +329,8 @@ export default function App() {
             {step === "pick" && (
               <div className="anim">
                 <div style={s.cardHeader} className="ch">
-                  <h2 style={s.cardTitle}>Select a date & time</h2>
-                  <p style={s.cardSub}>Pick an available date, then choose your slot</p>
+                  <h2 style={s.cardTitle}>{t.cardTitlePick}</h2>
+                  <p style={s.cardSub}>{t.cardSubPick}</p>
                 </div>
 
                 {loading && (
@@ -236,7 +340,7 @@ export default function App() {
                 )}
 
                 {!loading && availability.days.length === 0 && (
-                  <div style={s.emptyBox}>No availability in the next 2 weeks. Please check back soon.</div>
+                  <div style={s.emptyBox}>{t.noAvailability}</div>
                 )}
 
                 {!loading && availability.days.length > 0 && (
@@ -249,7 +353,7 @@ export default function App() {
                             style={{ ...s.calNavBtn, opacity: canPrevMonth ? 1 : 0.3, cursor: canPrevMonth ? "pointer" : "default", width: "auto", padding: "0 12px", fontSize: 12, fontWeight: 600, color: "#374151" }}
                             onClick={() => canPrevMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
                           >
-                            ← Prev
+                            {t.prevMonth}
                           </button>
                           <span style={s.monthLabel}>{calMonthName}</span>
                           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
@@ -263,20 +367,20 @@ export default function App() {
                                   if (availSet.has(todayStr)) { setSelectedDate(todayStr); setSelectedSlot(null); }
                                 }}
                               >
-                                ↩ Today
+                                {t.today}
                               </button>
                             )}
                             <button
                               style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default", width: "auto", padding: "0 12px", fontSize: 12, fontWeight: 600, color: "#374151" }}
                               onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
                             >
-                              Next →
+                              {t.nextMonth}
                             </button>
                           </div>
                         </div>
                       </div>
                       <div style={s.calGrid}>
-                        {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(h => (
+                        {t.dayHeaders.map(h => (
                           <div key={h} style={s.calDayHeader}>{h}</div>
                         ))}
                         {calCells.map((cell, i) => {
@@ -316,7 +420,7 @@ export default function App() {
                           <rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="#9CA3AF" strokeWidth="1.4"/>
                           <path d="M4.5 1.5v2M9.5 1.5v2M1.5 5.5h11" stroke="#9CA3AF" strokeWidth="1.4" strokeLinecap="round"/>
                         </svg>
-                        Select a date above to see available times
+                        {t.selectDatePrompt}
                       </div>
                     )}
 
@@ -329,11 +433,11 @@ export default function App() {
                               <circle cx="7" cy="7" r="5.5" stroke={CONFIG.ACCENT} strokeWidth="1.4"/>
                               <path d="M7 4v3l2 1.5" stroke={CONFIG.ACCENT} strokeWidth="1.4" strokeLinecap="round"/>
                             </svg>
-                            {fmtDate(selectedDate)} — available times
+                            {fmtDate(selectedDate, t.locale)} — {t.availableTimes}
                           </div>
                           {!selectedSlot && (
                             <span className="pick-time-hint" style={{ fontSize: 11, fontWeight: 600, color: CONFIG.ACCENT, background: `${CONFIG.ACCENT}15`, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" }}>
-                              ↓ pick a time
+                              {t.pickTimeHint}
                             </span>
                           )}
                         </div>
@@ -365,7 +469,7 @@ export default function App() {
 
                 <div style={s.cardFooter} className="cf">
                   {nudgeTime && !selectedSlot && (
-                    <p style={s.nudgeMsg}>{selectedDate ? "Please select a time to continue" : "Please select a date first"}</p>
+                    <p style={s.nudgeMsg}>{selectedDate ? t.nudgeTime : t.nudgeDate}</p>
                   )}
                   <div
                     ref={continueRef}
@@ -378,7 +482,7 @@ export default function App() {
                       disabled={loading}
                       onClick={() => { if (!selectedSlot) { setNudgeTime(true); return; } goTo("details"); }}
                     >
-                      Continue
+                      {t.continue}
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginLeft: 8 }}>
                         <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
@@ -396,10 +500,10 @@ export default function App() {
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    Back
+                    {t.back}
                   </button>
-                  <h2 style={s.cardTitle}>Your details</h2>
-                  <p style={s.cardSub}>Almost done — just a couple more things</p>
+                  <h2 style={s.cardTitle}>{t.cardTitleDetails}</h2>
+                  <p style={s.cardSub}>{t.cardSubDetails}</p>
                 </div>
 
                 <div style={s.summaryRow} className="sr">
@@ -408,23 +512,23 @@ export default function App() {
                       <rect x="1.5" y="2.5" width="11" height="10" rx="2" stroke="#374151" strokeWidth="1.4"/>
                       <path d="M4.5 1.5v2M9.5 1.5v2M1.5 5.5h11" stroke="#374151" strokeWidth="1.4" strokeLinecap="round"/>
                     </svg>
-                    {fmtDate(selectedDate)}
+                    {fmtDate(selectedDate, t.locale)}
                   </div>
                   <div style={s.summaryChip}>
                     <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
                       <circle cx="7" cy="7" r="5.5" stroke="#374151" strokeWidth="1.4"/>
                       <path d="M7 4v3l2 1.5" stroke="#374151" strokeWidth="1.4" strokeLinecap="round"/>
                     </svg>
-                    {fmtRange(selectedSlot.start, selectedSlot.end)} · {CONFIG.SLOT_DURATION} min
+                    {fmtRange(selectedSlot.start, selectedSlot.end)} · {CONFIG.SLOT_DURATION} {t.min}
                   </div>
                 </div>
 
                 <div style={s.formGrid} className="fg">
                   <div style={s.field}>
-                    <label style={s.label}>Full name</label>
+                    <label style={s.label}>{t.labelName}</label>
                     <input
                       style={{ ...s.input, ...(formErrors.name ? s.inputErr : {}) }}
-                      placeholder="Jane Smith"
+                      placeholder={t.placeholderName}
                       value={form.name}
                       autoFocus
                       onChange={(e) => { setForm(f => ({ ...f, name: e.target.value })); setFormErrors(fe => ({ ...fe, name: undefined })); }}
@@ -432,27 +536,27 @@ export default function App() {
                     {formErrors.name && <p style={s.errMsg}>{formErrors.name}</p>}
                   </div>
                   <div style={s.field}>
-                    <label style={s.label}>Email address</label>
+                    <label style={s.label}>{t.labelEmail}</label>
                     <input
                       style={{ ...s.input, ...(formErrors.email ? s.inputErr : {}) }}
                       type="email"
-                      placeholder="jane@company.com"
+                      placeholder={t.placeholderEmail}
                       value={form.email}
                       onChange={(e) => { setForm(f => ({ ...f, email: e.target.value })); setFormErrors(fe => ({ ...fe, email: undefined })); }}
                     />
                     {formErrors.email
                       ? <p style={s.errMsg}>{formErrors.email}</p>
-                      : <p style={s.inputHint}>Confirmation sent here</p>
+                      : <p style={s.inputHint}>{t.emailHint}</p>
                     }
                   </div>
                   <div style={{ ...s.field, gridColumn: "1 / -1" }}>
                     <label style={s.label}>
-                      Notes
-                      <span style={{ color: "#9CA3AF", fontWeight: 400, marginLeft: 6 }}>optional</span>
+                      {t.labelNotes}
+                      <span style={{ color: "#9CA3AF", fontWeight: 400, marginLeft: 6 }}>{t.optional}</span>
                     </label>
                     <textarea
                       style={{ ...s.input, minHeight: 100, resize: "none" }}
-                      placeholder="Topics to discuss, questions, or anything helpful to know beforehand…"
+                      placeholder={t.placeholderNotes}
                       value={form.notes}
                       onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))}
                     />
@@ -469,16 +573,16 @@ export default function App() {
                     {submitting ? (
                       <span style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
                         <span style={s.btnSpinner} />
-                        Confirming…
+                        {t.confirming}
                       </span>
-                    ) : "Confirm booking"}
+                    ) : t.confirmBooking}
                   </button>
                   <p style={s.secureNote}>
                     <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
                       <rect x="2" y="6" width="10" height="7" rx="2" stroke="#9CA3AF" strokeWidth="1.4"/>
                       <path d="M4.5 6V4.5a2.5 2.5 0 015 0V6" stroke="#9CA3AF" strokeWidth="1.4" strokeLinecap="round"/>
                     </svg>
-                    Your information is secure and never shared
+                    {t.secureNote}
                   </p>
                 </div>
               </div>
@@ -494,18 +598,18 @@ export default function App() {
                     </svg>
                   </div>
                 </div>
-                <h2 style={s.doneTitle}>You're booked!</h2>
+                <h2 style={s.doneTitle}>{t.doneTitle}</h2>
                 <p style={s.doneSub}>
-                  Looking forward to meeting with you, <strong>{form.name}</strong> on <strong>{fmtDate(selectedDate)}</strong>.
+                  {t.doneSub(<strong>{form.name}</strong>, <strong>{fmtDate(selectedDate, t.locale)}</strong>)}
                 </p>
 
                 <div style={s.confirmCard}>
-                  <div style={s.confirmCardHeader}>Appointment Summary</div>
+                  <div style={s.confirmCardHeader}>{t.appointmentSummary}</div>
                   {[
-                    { label: "Date", val: fmtDate(selectedDate) },
-                    { label: "Time", val: `${fmtRange(selectedSlot.start, selectedSlot.end)} (${CONFIG.SLOT_DURATION} min)` },
-                    { label: "Name", val: form.name },
-                    { label: "Email", val: form.email },
+                    { label: t.labelDate, val: fmtDate(selectedDate, t.locale) },
+                    { label: t.labelTime, val: `${fmtRange(selectedSlot.start, selectedSlot.end)} (${CONFIG.SLOT_DURATION} ${t.min})` },
+                    { label: t.labelNameField, val: form.name },
+                    { label: t.labelEmailField, val: form.email },
                   ].map(({ label, val }) => (
                     <div key={label} style={s.confirmRow}>
                       <span style={s.confirmLabel}>{label}</span>
@@ -514,16 +618,16 @@ export default function App() {
                   ))}
                   {booking?.meetLink && (
                     <div style={{ ...s.confirmRow, borderBottom: "none" }}>
-                      <span style={s.confirmLabel}>Meeting link</span>
+                      <span style={s.confirmLabel}>{t.labelMeetLink}</span>
                       <a href={booking.meetLink} target="_blank" rel="noreferrer" style={s.meetLink}>
-                        Join Google Meet →
+                        {t.joinMeet}
                       </a>
                     </div>
                   )}
                 </div>
 
                 <div style={s.emailBanner}>
-                  A confirmation email has been sent to <strong>{form.email}</strong>
+                  {t.emailBanner(<strong>{form.email}</strong>)}
                 </div>
 
                 <button
@@ -531,7 +635,7 @@ export default function App() {
                   style={s.btnGhostDark}
                   onClick={() => { setStep("pick"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}
                 >
-                  Schedule another appointment
+                  {t.scheduleAnother}
                 </button>
               </div>
             )}
@@ -547,7 +651,7 @@ export default function App() {
   );
 }
 
-function Nav() {
+function Nav({ lang, setLang }) {
   return (
     <header style={s.nav}>
       <div style={s.navInner}>
@@ -558,6 +662,28 @@ function Nav() {
             </svg>
           </div>
           <span style={s.navBrand}>{CONFIG.BUSINESS_NAME}</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", background: "#F3F4F6", borderRadius: 8, padding: 3, gap: 2 }}>
+          {["en", "he"].map((l) => (
+            <button
+              key={l}
+              onClick={() => setLang(l)}
+              style={{
+                padding: "5px 12px",
+                borderRadius: 6,
+                border: "none",
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: "'Inter', sans-serif",
+                cursor: "pointer",
+                background: lang === l ? CONFIG.ACCENT : "transparent",
+                color: lang === l ? "#fff" : "#6B7280",
+                transition: "all 0.15s",
+              }}
+            >
+              {l === "en" ? "EN" : "עב"}
+            </button>
+          ))}
         </div>
       </div>
     </header>
@@ -632,7 +758,7 @@ const globalStyles = `
 const s = {
   page: { minHeight: "100vh", background: "#F3F4F6", fontFamily: "'Inter', sans-serif" },
   nav: { position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)", borderBottom: "1px solid #E5E7EB" },
-  navInner: { maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center" },
+  navInner: { maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" },
   navLogo: { width: 32, height: 32, borderRadius: 8, background: CONFIG.ACCENT, display: "flex", alignItems: "center", justifyContent: "center" },
   navBrand: { fontSize: 15, fontWeight: 600, color: CONFIG.ACCENT, letterSpacing: "-0.2px" },
 
