@@ -243,39 +243,33 @@ export default function App() {
                     {/* Calendar */}
                     <div style={s.calWrap} className="cal-wrap">
                       <div style={s.monthNav}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <button
-                            style={{ ...s.calNavBtn, opacity: canPrevMonth ? 1 : 0.3, cursor: canPrevMonth ? "pointer" : "default" }}
-                            onClick={() => canPrevMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-                          >
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                              <path d="M9 2L4 7l5 5" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-                          <button
-                            style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default" }}
-                            onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-                          >
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                              <path d="M5 2l5 5-5 5" stroke="#374151" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
+                        <button
+                          style={{ ...s.calNavBtn, opacity: canPrevMonth ? 1 : 0.3, cursor: canPrevMonth ? "pointer" : "default", width: "auto", padding: "0 10px", fontSize: 12, fontWeight: 600, color: "#374151" }}
+                          onClick={() => canPrevMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                        >
+                          ← Prev
+                        </button>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                          <span style={s.monthLabel}>{calMonthName}</span>
+                          {(canPrevMonth || (selectedDate && selectedDate !== todayStr)) && (
+                            <button
+                              style={{ ...s.calNavBtn, fontSize: 11, fontWeight: 600, color: CONFIG.ACCENT, padding: "0 8px", width: "auto", height: 22, border: `1.5px solid ${CONFIG.ACCENT}`, background: "transparent" }}
+                              onClick={() => {
+                                const n = new Date();
+                                setCurrentMonth({ year: n.getFullYear(), month: n.getMonth() });
+                                if (availSet.has(todayStr)) { setSelectedDate(todayStr); setSelectedSlot(null); }
+                              }}
+                            >
+                              Today
+                            </button>
+                          )}
                         </div>
-                        <span style={s.monthLabel}>{calMonthName}</span>
-                        {(canPrevMonth || (selectedDate && selectedDate !== todayStr)) ? (
-                          <button
-                            style={{ ...s.calNavBtn, fontSize: 12, fontWeight: 600, color: "#374151", padding: "0 10px", width: "auto", letterSpacing: "-0.1px" }}
-                            onClick={() => {
-                              const n = new Date();
-                              setCurrentMonth({ year: n.getFullYear(), month: n.getMonth() });
-                              if (availSet.has(todayStr)) { setSelectedDate(todayStr); setSelectedSlot(null); }
-                            }}
-                          >
-                            Today
-                          </button>
-                        ) : (
-                          <div style={{ width: 52 }} />
-                        )}
+                        <button
+                          style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default", width: "auto", padding: "0 10px", fontSize: 12, fontWeight: 600, color: "#374151" }}
+                          onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                        >
+                          Next →
+                        </button>
                       </div>
                       <div style={s.calGrid}>
                         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(h => (
