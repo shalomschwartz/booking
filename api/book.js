@@ -47,6 +47,22 @@ export default async function handler(req, res) {
     const created = await calResp.json();
     const meetLink = created.conferenceData?.entryPoints?.find(e => e.entryPointType === 'video')?.uri || null;
 
+    // Save booking to Supabase
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+    if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
+      await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ name, email, notes: notes || null, start_time: start, end_time: end, meet_link: meetLink, event_id: created.id }),
+      });
+    }
+
     await sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
 
     return res.status(200).json({ success: true, eventId: created.id, meetLink });

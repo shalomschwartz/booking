@@ -4,7 +4,7 @@ const CONFIG = {
   BUSINESS_NAME: import.meta.env.VITE_BUSINESS_NAME || "Shalom AI Solutions",
   OWNER_NAME: import.meta.env.VITE_OWNER_NAME || "Your Name",
   SLOT_DURATION: parseInt(import.meta.env.VITE_SLOT_DURATION_MINS || "30"),
-  ACCENT: import.meta.env.VITE_ACCENT_COLOR || '#111827',
+  ACCENT: import.meta.env.VITE_ACCENT_COLOR || '#4F46E5',
 };
 
 const T = {
