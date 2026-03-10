@@ -43,13 +43,6 @@ export default function App() {
   const [nudgeTime, setNudgeTime] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
   const monthCacheRef = useRef({});
-  const slotsRef = useRef(null);
-
-  useEffect(() => {
-    if (selectedDate && slotsRef.current) {
-      setTimeout(() => slotsRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
-    }
-  }, [selectedDate]);
 
   useEffect(() => {
     const monthStr = `${currentMonth.year}-${String(currentMonth.month + 1).padStart(2, '0')}`;
@@ -328,7 +321,7 @@ export default function App() {
 
                     {/* Slots — appear when date is selected */}
                     {selectedDate && (
-                      <div className="anim" ref={slotsRef}>
+                      <div className="anim">
                         <div style={{ ...s.slotsSectionTitle, justifyContent: "space-between" }} className="ssl">
                           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                             <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
@@ -339,7 +332,7 @@ export default function App() {
                           </div>
                           {!selectedSlot && (
                             <span className="pick-time-hint" style={{ fontSize: 11, fontWeight: 600, color: CONFIG.ACCENT, background: `${CONFIG.ACCENT}15`, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" }}>
-                              ← pick a time
+                              ↓ pick a time
                             </span>
                           )}
                         </div>
@@ -605,7 +598,7 @@ const globalStyles = `
   .today-btn { transition: opacity 0.15s !important; }
   .today-btn:hover { opacity: 0.85 !important; }
   @keyframes slideInRight { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-  @keyframes nudgePulse { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-4px); } }
+  @keyframes nudgePulse { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
   .pick-time-hint { animation: slideInRight 0.35s cubic-bezier(0.22,1,0.36,1) forwards, nudgePulse 1.4s ease-in-out 0.5s infinite; display: inline-block; }
 
   @media (max-width: 600px) {
