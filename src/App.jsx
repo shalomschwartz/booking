@@ -242,34 +242,35 @@ export default function App() {
                   <>
                     {/* Calendar */}
                     <div style={s.calWrap} className="cal-wrap">
-                      <div style={s.monthNav}>
-                        <button
-                          style={{ ...s.calNavBtn, opacity: canPrevMonth ? 1 : 0.3, cursor: canPrevMonth ? "pointer" : "default", width: "auto", padding: "0 10px", fontSize: 12, fontWeight: 600, color: "#374151" }}
-                          onClick={() => canPrevMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-                        >
-                          ← Prev
-                        </button>
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                          <button
+                            style={{ ...s.calNavBtn, opacity: canPrevMonth ? 1 : 0.3, cursor: canPrevMonth ? "pointer" : "default", width: "auto", padding: "0 12px", fontSize: 12, fontWeight: 600, color: "#374151" }}
+                            onClick={() => canPrevMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month - 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                          >
+                            ← Prev
+                          </button>
                           <span style={s.monthLabel}>{calMonthName}</span>
-                          {(canPrevMonth || (selectedDate && selectedDate !== todayStr)) && (
-                            <button
-                              style={{ ...s.calNavBtn, fontSize: 11, fontWeight: 600, color: CONFIG.ACCENT, padding: "0 8px", width: "auto", height: 22, border: `1.5px solid ${CONFIG.ACCENT}`, background: "transparent" }}
-                              onClick={() => {
-                                const n = new Date();
-                                setCurrentMonth({ year: n.getFullYear(), month: n.getMonth() });
-                                if (availSet.has(todayStr)) { setSelectedDate(todayStr); setSelectedSlot(null); }
-                              }}
-                            >
-                              Today
-                            </button>
-                          )}
+                          <button
+                            style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default", width: "auto", padding: "0 12px", fontSize: 12, fontWeight: 600, color: "#374151" }}
+                            onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                          >
+                            Next →
+                          </button>
                         </div>
-                        <button
-                          style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default", width: "auto", padding: "0 10px", fontSize: 12, fontWeight: 600, color: "#374151" }}
-                          onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-                        >
-                          Next →
-                        </button>
+                        {(canPrevMonth || (selectedDate && selectedDate !== todayStr)) && (
+                          <button
+                            className="today-btn"
+                            style={{ width: "100%", padding: "8px", background: CONFIG.ACCENT, color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif", letterSpacing: "-0.1px" }}
+                            onClick={() => {
+                              const n = new Date();
+                              setCurrentMonth({ year: n.getFullYear(), month: n.getMonth() });
+                              if (availSet.has(todayStr)) { setSelectedDate(todayStr); setSelectedSlot(null); }
+                            }}
+                          >
+                            Jump to today
+                          </button>
+                        )}
                       </div>
                       <div style={s.calGrid}>
                         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(h => (
@@ -585,6 +586,8 @@ const globalStyles = `
 
   .cal-day { transition: background 0.1s, color 0.1s !important; border-radius: 8px; }
   .cal-day:not(.cal-selected):hover { background: #F3F4F6 !important; }
+  .today-btn { transition: opacity 0.15s !important; }
+  .today-btn:hover { opacity: 0.85 !important; }
 
   @media (max-width: 600px) {
     .ph { margin-bottom: 20px !important; }
