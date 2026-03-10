@@ -43,6 +43,13 @@ export default function App() {
   const [nudgeTime, setNudgeTime] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() }; });
   const monthCacheRef = useRef({});
+  const slotsRef = useRef(null);
+
+  useEffect(() => {
+    if (selectedDate && slotsRef.current) {
+      setTimeout(() => slotsRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    }
+  }, [selectedDate]);
 
   useEffect(() => {
     const monthStr = `${currentMonth.year}-${String(currentMonth.month + 1).padStart(2, '0')}`;
@@ -251,26 +258,27 @@ export default function App() {
                             ← Prev
                           </button>
                           <span style={s.monthLabel}>{calMonthName}</span>
-                          <button
-                            style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default", width: "auto", padding: "0 12px", fontSize: 12, fontWeight: 600, color: "#374151" }}
-                            onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
-                          >
-                            Next →
-                          </button>
-                        </div>
-                        {(canPrevMonth || (selectedDate && selectedDate !== todayStr)) && (
-                          <button
-                            className="today-btn"
-                            style={{ width: "100%", padding: "8px", background: CONFIG.ACCENT, color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif", letterSpacing: "-0.1px" }}
-                            onClick={() => {
-                              const n = new Date();
-                              setCurrentMonth({ year: n.getFullYear(), month: n.getMonth() });
-                              if (availSet.has(todayStr)) { setSelectedDate(todayStr); setSelectedSlot(null); }
-                            }}
-                          >
-                            Jump to today
-                          </button>
-                        )}
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
+                            {(canPrevMonth || (selectedDate && selectedDate !== todayStr)) && (
+                              <button
+                                className="today-btn"
+                                style={{ padding: "3px 10px", background: CONFIG.ACCENT, color: "#fff", border: "none", borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif", whiteSpace: "nowrap" }}
+                                onClick={() => {
+                                  const n = new Date();
+                                  setCurrentMonth({ year: n.getFullYear(), month: n.getMonth() });
+                                  if (availSet.has(todayStr)) { setSelectedDate(todayStr); setSelectedSlot(null); }
+                                }}
+                              >
+                                ↩ Today
+                              </button>
+                            )}
+                            <button
+                              style={{ ...s.calNavBtn, opacity: canNextMonth ? 1 : 0.3, cursor: canNextMonth ? "pointer" : "default", width: "auto", padding: "0 12px", fontSize: 12, fontWeight: 600, color: "#374151" }}
+                              onClick={() => canNextMonth && setCurrentMonth(cm => { const d = new Date(cm.year, cm.month + 1, 1); return { year: d.getFullYear(), month: d.getMonth() }; })}
+                            >
+                              Next →
+                            </button>
+                          </div>
                       </div>
                       <div style={s.calGrid}>
                         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(h => (
@@ -319,13 +327,20 @@ export default function App() {
 
                     {/* Slots — appear when date is selected */}
                     {selectedDate && (
-                      <div className="anim">
-                        <div style={s.slotsSectionTitle} className="ssl">
-                          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-                            <circle cx="7" cy="7" r="5.5" stroke={CONFIG.ACCENT} strokeWidth="1.4"/>
-                            <path d="M7 4v3l2 1.5" stroke={CONFIG.ACCENT} strokeWidth="1.4" strokeLinecap="round"/>
-                          </svg>
-                          {fmtDate(selectedDate)} — available times
+                      <div className="anim" ref={slotsRef}>
+                        <div style={{ ...s.slotsSectionTitle, justifyContent: "space-between" }} className="ssl">
+                          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                              <circle cx="7" cy="7" r="5.5" stroke={CONFIG.ACCENT} strokeWidth="1.4"/>
+                              <path d="M7 4v3l2 1.5" stroke={CONFIG.ACCENT} strokeWidth="1.4" strokeLinecap="round"/>
+                            </svg>
+                            {fmtDate(selectedDate)} — available times
+                          </div>
+                          {!selectedSlot && (
+                            <span className="pick-time-hint" style={{ fontSize: 11, fontWeight: 600, color: CONFIG.ACCENT, background: `${CONFIG.ACCENT}15`, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" }}>
+                              ← pick a time
+                            </span>
+                          )}
                         </div>
                         <div style={s.timeGrid} className="tg">
                           {slotsForDate.map((sl, i) => {
@@ -588,6 +603,9 @@ const globalStyles = `
   .cal-day:not(.cal-selected):hover { background: #F3F4F6 !important; }
   .today-btn { transition: opacity 0.15s !important; }
   .today-btn:hover { opacity: 0.85 !important; }
+  @keyframes slideInRight { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes nudgePulse { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-4px); } }
+  .pick-time-hint { animation: slideInRight 0.35s cubic-bezier(0.22,1,0.36,1) forwards, nudgePulse 1.4s ease-in-out 0.5s infinite; display: inline-block; }
 
   @media (max-width: 600px) {
     .ph { margin-bottom: 20px !important; }
