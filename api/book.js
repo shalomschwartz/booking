@@ -74,7 +74,7 @@ export default async function handler(req, res) {
 
 async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration, businessName }) {
   const tz = process.env.TIMEZONE || 'Asia/Jerusalem';
-  const accent = process.env.ACCENT_COLOR || '#111827';
+  const accent = '#4F46E5';
   const startDate = new Date(start);
   const endDate = new Date(end);
   const dateStr = startDate.toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
