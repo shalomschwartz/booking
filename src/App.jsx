@@ -141,6 +141,16 @@ const fmtDate = (dateStr, locale) => {
   return d.toLocaleDateString(locale, { weekday: "long", month: "long", day: "numeric" });
 };
 
+const fmtCompactDate = (dateStr, locale) => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr + "T12:00:00");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = String(d.getFullYear()).slice(2);
+  const dayName = d.toLocaleDateString(locale, { weekday: "long" });
+  return `${dd}/${mm}/${yy} ${dayName}`;
+};
+
 const groupByPeriod = (slots, t) => {
   const groups = [
     { key: "morning", label: t.morning, slots: [] },
@@ -421,21 +431,27 @@ export default function App() {
                               onClick={() => { if (clickable) { setSelectedDate(cell); setSelectedSlot(null); } }}
                               style={{
                                 ...s.calCell,
-                                background: isSel ? CONFIG.ACCENT : clickable ? hexToRgba(CONFIG.ACCENT, 0.15) : "transparent",
-                                color: isSel ? "#fff" : isPast || !isAvail ? "#D1D5DB" : CONFIG.ACCENT,
+                                background: isSel ? "#1D4ED8" : clickable ? "#DBEAFE" : "transparent",
+                                color: isSel ? "#fff" : isPast || !isAvail ? "#D1D5DB" : "#1D4ED8",
                                 fontWeight: isSel || isToday ? 700 : 500,
                                 cursor: clickable ? "pointer" : "default",
+                                outline: isToday && !isSel ? "2px solid #1D4ED8" : "none",
+                                outlineOffset: "-2px",
                               }}
                             >
                               {parseInt(cell.split('-')[2])}
-                              {isToday && !isSel && (
-                                <span style={{ position: "absolute", bottom: 2, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: "50%", background: CONFIG.ACCENT }} />
-                              )}
                             </div>
                           );
                         })}
                       </div>
                     </div>
+
+                    {/* Selected date label */}
+                    {selectedDate && (
+                      <div style={{ padding: "10px 36px 4px", fontSize: 14, fontWeight: 700, color: "#1D4ED8", direction: "ltr", textAlign: lang === "he" ? "right" : "left" }} className="ssl">
+                        {fmtCompactDate(selectedDate, t.locale)}
+                      </div>
+                    )}
 
                     {/* Prompt when no date selected yet */}
                     {!selectedDate && (
@@ -479,14 +495,14 @@ export default function App() {
                                       onClick={() => { setSelectedSlot(sl); setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 80); }}
                                       style={{
                                         ...s.slotPill,
-                                        background: sel ? CONFIG.ACCENT : "#F9FAFB",
-                                        color: sel ? "#fff" : "#374151",
-                                        border: `1.5px solid ${sel ? CONFIG.ACCENT : "#E5E7EB"}`,
-                                        fontWeight: sel ? 600 : 500,
+                                        background: sel ? "#1D4ED8" : "#fff",
+                                        color: sel ? "#fff" : "#1D4ED8",
+                                        border: `1.5px solid ${sel ? "#1D4ED8" : "#BFDBFE"}`,
+                                        fontWeight: sel ? 700 : 500,
                                         direction: "ltr",
                                       }}
                                     >
-                                      {fmtRange(sl.start, sl.end)}
+                                      {fmt24(sl.start)}
                                     </div>
                                   );
                                 })}
@@ -730,7 +746,7 @@ function Nav({ lang, setLang }) {
 const globalStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: ${hexToRgba(CONFIG.ACCENT, 0.12)}; }
+  body { background: #fff; }
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -750,7 +766,7 @@ const globalStyles = `
   .day-card:not(.day-selected):hover { border-color: #6B7280 !important; transform: translateY(-2px) !important; box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important; }
 
   .slot-pill { transition: border-color 0.15s, background 0.15s, transform 0.12s, box-shadow 0.15s !important; cursor: pointer; }
-  .slot-pill:not(.slot-selected):hover { border-color: #6B7280 !important; background: #F3F4F6 !important; transform: translateY(-1px) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.07) !important; }
+  .slot-pill:not(.slot-selected):hover { border-color: #1D4ED8 !important; background: #EFF6FF !important; transform: translateY(-1px) !important; box-shadow: 0 4px 12px rgba(29,78,216,0.1) !important; }
 
   .btn-primary { transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s !important; cursor: pointer; }
   .btn-primary:hover:not(:disabled) { opacity: 0.88 !important; transform: translateY(-1px) !important; box-shadow: 0 8px 24px rgba(17,24,39,0.28) !important; }
@@ -780,7 +796,7 @@ const globalStyles = `
     .cf { padding: 8px 20px 28px !important; }
     .dg { padding: 14px 20px !important; gap: 6px !important; }
     .tg { padding: 8px 20px 20px !important; }
-    .tg .time-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .tg .time-grid { grid-template-columns: repeat(4, 1fr) !important; }
     .cal-wrap { padding: 14px 16px 8px !important; }
     .ssl { padding: 12px 16px 4px !important; }
     .sr { padding: 14px 20px 4px !important; }
@@ -798,7 +814,7 @@ const globalStyles = `
 `;
 
 const s = {
-  page: { minHeight: "100vh", background: hexToRgba(CONFIG.ACCENT, 0.12), fontFamily: "'Inter', sans-serif" },
+  page: { minHeight: "100vh", background: "#fff", fontFamily: "'Inter', sans-serif" },
   nav: { position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)", borderBottom: "1px solid #E5E7EB" },
   navInner: { maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" },
   navLogo: { width: 32, height: 32, borderRadius: 8, background: CONFIG.ACCENT, display: "flex", alignItems: "center", justifyContent: "center" },
@@ -836,8 +852,8 @@ const s = {
   dayGrid: { display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, padding: "24px 36px" },
   dayCard: { display: "flex", flexDirection: "column", alignItems: "center", padding: "14px 6px", borderRadius: 12, gap: 4 },
 
-  timeGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 },
-  slotPill: { padding: "16px 10px", borderRadius: 50, fontSize: 14, textAlign: "center", letterSpacing: "0.1px" },
+  timeGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 },
+  slotPill: { padding: "12px 6px", borderRadius: 10, fontSize: 14, textAlign: "center", letterSpacing: "0.1px", fontWeight: 500 },
   periodLabel: { fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 10 },
 
   summaryRow: { display: "flex", gap: 8, padding: "20px 36px 4px", flexWrap: "wrap" },
@@ -879,9 +895,9 @@ const s = {
   monthNav: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 },
   monthLabel: { fontSize: 15, fontWeight: 700, color: "#111827", letterSpacing: "-0.2px" },
   calNavBtn: { width: 32, height: 32, borderRadius: 8, background: "#F9FAFB", border: "1.5px solid #E5E7EB", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, fontFamily: "'Inter', sans-serif", cursor: "pointer" },
-  calGrid: { display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 3 },
-  calDayHeader: { height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, color: "#9CA3AF", letterSpacing: "0.3px" },
-  calCell: { height: 38, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, fontSize: 14, userSelect: "none", position: "relative" },
+  calGrid: { display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 },
+  calDayHeader: { height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, color: "#6B7280" },
+  calCell: { height: 40, width: 40, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", fontSize: 14, fontWeight: 500, userSelect: "none", position: "relative" },
   slotsSectionTitle: { display: "flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 600, color: "#374151", padding: "16px 36px 4px" },
   selectDatePrompt: { display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#9CA3AF", padding: "14px 36px 20px", fontWeight: 500 },
   footer: { textAlign: "center", fontSize: 12, color: "#9CA3AF", marginTop: 24 },
