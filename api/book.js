@@ -63,7 +63,8 @@ export default async function handler(req, res) {
       });
     }
 
-    await sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
+    const calendarLink = created.htmlLink || null;
+    await sendConfirmationEmail({ name, email, start, end, meetLink, calendarLink, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
 
     return res.status(200).json({ success: true, eventId: created.id, meetLink });
   } catch (err) {
@@ -72,7 +73,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDuration, businessName }) {
+async function sendConfirmationEmail({ name, email, start, end, calendarLink, slotDuration, businessName }) {
   const tz = process.env.TIMEZONE || 'Asia/Jerusalem';
   const accent = '#4F46E5';
   const startDate = new Date(start);
@@ -160,22 +161,16 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
                               </td>
                             </tr>
                             <tr>
-                              <td style="padding:14px 0;border-bottom:1px solid #E5E7EB;">
+                              <td style="padding:14px 0;${calendarLink ? 'border-bottom:1px solid #E5E7EB;' : ''}">
                                 <span style="font-size:13px;color:#6B7280;font-weight:500;">Name</span><br/>
                                 <span style="font-size:15px;color:${accent};font-weight:600;">${name}</span>
                               </td>
                             </tr>
-                            <tr>
-                              <td style="padding:14px 0;${meetLink ? 'border-bottom:1px solid #E5E7EB;' : ''}">
-                                <span style="font-size:13px;color:#6B7280;font-weight:500;">Format</span><br/>
-                                <span style="font-size:15px;color:${accent};font-weight:600;">Video call via Google Meet</span>
-                              </td>
-                            </tr>
-                            ${meetLink ? `
+                            ${calendarLink ? `
                             <tr>
                               <td style="padding:14px 0;">
-                                <span style="font-size:13px;color:#6B7280;font-weight:500;">Meeting link</span><br/>
-                                <a href="${meetLink}" style="font-size:15px;color:${accent};font-weight:600;text-decoration:underline;">${meetLink}</a>
+                                <span style="font-size:13px;color:#6B7280;font-weight:500;">View in Google Calendar</span><br/>
+                                <a href="${calendarLink}" style="font-size:15px;color:${accent};font-weight:600;text-decoration:underline;">Open event →</a>
                               </td>
                             </tr>` : ''}
                           </table>
@@ -183,13 +178,13 @@ async function sendConfirmationEmail({ name, email, start, end, meetLink, slotDu
                       </tr>
                     </table>
 
-                    ${meetLink ? `
+                    ${calendarLink ? `
                     <!-- CTA Button -->
                     <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                       <tr>
                         <td style="background:${accent};border-radius:10px;">
-                          <a href="${meetLink}" style="display:inline-block;padding:14px 28px;color:#fff;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:-0.1px;">
-                            Join Google Meet →
+                          <a href="${calendarLink}" style="display:inline-block;padding:14px 28px;color:#fff;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:-0.1px;">
+                            View in Google Calendar →
                           </a>
                         </td>
                       </tr>
