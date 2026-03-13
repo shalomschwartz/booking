@@ -64,7 +64,7 @@ export default async function handler(req, res) {
     }
 
     const calendarLink = created.htmlLink || null;
-    await sendConfirmationEmail({ name, email, start, end, meetLink, calendarLink, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
+    await sendConfirmationEmail({ name, email, notes, start, end, calendarLink, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
 
     return res.status(200).json({ success: true, eventId: created.id, meetLink });
   } catch (err) {
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function sendConfirmationEmail({ name, email, start, end, calendarLink, slotDuration, businessName }) {
+async function sendConfirmationEmail({ name, email, notes, start, end, calendarLink, slotDuration, businessName }) {
   const tz = process.env.TIMEZONE || 'Asia/Jerusalem';
   const accent = '#4F46E5';
   const startDate = new Date(start);
@@ -161,11 +161,18 @@ async function sendConfirmationEmail({ name, email, start, end, calendarLink, sl
                               </td>
                             </tr>
                             <tr>
-                              <td style="padding:14px 0;">
+                              <td style="padding:14px 0;${notes ? 'border-bottom:1px solid #E5E7EB;' : ''}">
                                 <span style="font-size:13px;color:#6B7280;font-weight:500;">Name</span><br/>
                                 <span style="font-size:15px;color:${accent};font-weight:600;">${name}</span>
                               </td>
                             </tr>
+                            ${notes ? `
+                            <tr>
+                              <td style="padding:14px 0;">
+                                <span style="font-size:13px;color:#6B7280;font-weight:500;">Notes</span><br/>
+                                <span style="font-size:15px;color:#374151;font-weight:500;">${notes}</span>
+                              </td>
+                            </tr>` : ''}
                           </table>
                         </td>
                       </tr>

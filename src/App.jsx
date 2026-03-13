@@ -663,6 +663,7 @@ export default function App() {
                     { label: t.labelTime, val: `${fmtRange(selectedSlot.start, selectedSlot.end)} (${CONFIG.SLOT_DURATION} ${t.min})`, ltr: true },
                     { label: t.labelNameField, val: form.name, ltr: false },
                     { label: t.labelEmailField, val: form.email, ltr: true },
+                    ...(form.notes ? [{ label: t.labelNotes, val: form.notes, ltr: false }] : []),
                   ].map(({ label, val, ltr }) => (
                     <div key={label} style={s.confirmRow}>
                       <span style={s.confirmLabel}>{label}</span>
