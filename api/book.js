@@ -170,7 +170,7 @@ async function sendConfirmationEmail({ name, email, notes, start, end, calendarL
                             <tr>
                               <td style="padding:14px 0;">
                                 <span style="font-size:13px;color:#6B7280;font-weight:500;">Notes</span><br/>
-                                <span style="font-size:15px;color:#374151;font-weight:500;">${notes}</span>
+                                <span style="font-size:15px;color:${accent};font-weight:600;">${notes}</span>
                               </td>
                             </tr>` : ''}
                           </table>
