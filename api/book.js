@@ -64,7 +64,10 @@ export default async function handler(req, res) {
     }
 
     const calendarLink = created.htmlLink || null;
-    await sendConfirmationEmail({ name, email, notes, start, end, calendarLink, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
+    const host = req.headers['x-forwarded-host'] || req.headers.host || '';
+    const proto = host.includes('localhost') ? 'http' : 'https';
+    const cancelUrl = `${proto}://${host}/api/cancel?eventId=${created.id}`;
+    await sendConfirmationEmail({ name, email, notes, start, end, calendarLink, cancelUrl, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
 
     return res.status(200).json({ success: true, eventId: created.id, meetLink });
   } catch (err) {
@@ -73,7 +76,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function sendConfirmationEmail({ name, email, notes, start, end, calendarLink, slotDuration, businessName }) {
+async function sendConfirmationEmail({ name, email, notes, start, end, calendarLink, cancelUrl, slotDuration, businessName }) {
   const tz = process.env.TIMEZONE || 'Asia/Jerusalem';
   const accent = '#4F46E5';
   const startDate = new Date(start);
@@ -178,17 +181,33 @@ async function sendConfirmationEmail({ name, email, notes, start, end, calendarL
                       </tr>
                     </table>
 
-                    ${calendarLink ? `
-                    <!-- CTA Button -->
+                    <!-- CTA Buttons -->
                     <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                       <tr>
-                        <td style="background:${accent};border-radius:10px;">
-                          <a href="${calendarLink}" style="display:inline-block;padding:14px 28px;color:#fff;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:-0.1px;">
-                            View in Google Calendar →
-                          </a>
+                        ${calendarLink ? `<td style="padding-right:8px;">
+                          <table cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="background:${accent};border-radius:10px;">
+                                <a href="${calendarLink}" style="display:inline-block;padding:13px 22px;color:#fff;font-size:14px;font-weight:600;text-decoration:none;letter-spacing:-0.1px;white-space:nowrap;">
+                                  View in Calendar →
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>` : ''}
+                        <td>
+                          <table cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="background:#fff;border:1.5px solid #E5E7EB;border-radius:10px;">
+                                <a href="${cancelUrl}" style="display:inline-block;padding:13px 22px;color:#DC2626;font-size:14px;font-weight:600;text-decoration:none;letter-spacing:-0.1px;white-space:nowrap;">
+                                  Cancel appointment
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
-                    </table>` : ''}
+                    </table>
 
                     <!-- Note -->
                     <p style="margin:0;font-size:13px;color:#9CA3AF;line-height:1.6;">
