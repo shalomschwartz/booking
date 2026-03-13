@@ -161,18 +161,11 @@ async function sendConfirmationEmail({ name, email, start, end, calendarLink, sl
                               </td>
                             </tr>
                             <tr>
-                              <td style="padding:14px 0;${calendarLink ? 'border-bottom:1px solid #E5E7EB;' : ''}">
+                              <td style="padding:14px 0;">
                                 <span style="font-size:13px;color:#6B7280;font-weight:500;">Name</span><br/>
                                 <span style="font-size:15px;color:${accent};font-weight:600;">${name}</span>
                               </td>
                             </tr>
-                            ${calendarLink ? `
-                            <tr>
-                              <td style="padding:14px 0;">
-                                <span style="font-size:13px;color:#6B7280;font-weight:500;">View in Google Calendar</span><br/>
-                                <a href="${calendarLink}" style="font-size:15px;color:${accent};font-weight:600;text-decoration:underline;">Open event →</a>
-                              </td>
-                            </tr>` : ''}
                           </table>
                         </td>
                       </tr>
