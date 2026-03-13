@@ -669,14 +669,6 @@ export default function App() {
                       <span style={s.confirmVal} dir={ltr ? "ltr" : undefined}>{val}</span>
                     </div>
                   ))}
-                  {booking?.meetLink && (
-                    <div style={{ ...s.confirmRow, borderBottom: "none" }}>
-                      <span style={s.confirmLabel}>{t.labelMeetLink}</span>
-                      <a href={booking.meetLink} target="_blank" rel="noreferrer" style={s.meetLink}>
-                        {t.joinMeet}
-                      </a>
-                    </div>
-                  )}
                 </div>
 
                 <div style={s.emailBanner}>
