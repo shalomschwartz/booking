@@ -67,7 +67,8 @@ export default async function handler(req, res) {
     const host = req.headers['x-forwarded-host'] || req.headers.host || '';
     const proto = host.includes('localhost') ? 'http' : 'https';
     const cancelUrl = `${proto}://${host}/api/cancel?eventId=${created.id}`;
-    await sendConfirmationEmail({ name, email, notes, start, end, calendarLink, cancelUrl, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
+    const rescheduleUrl = `${proto}://${host}?reschedule=${created.id}`;
+    await sendConfirmationEmail({ name, email, notes, start, end, calendarLink, cancelUrl, rescheduleUrl, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
 
     return res.status(200).json({ success: true, eventId: created.id, meetLink });
   } catch (err) {
@@ -195,6 +196,17 @@ async function sendConfirmationEmail({ name, email, notes, start, end, calendarL
                             </tr>
                           </table>
                         </td>` : ''}
+                        <td style="padding-right:8px;">
+                          <table cellpadding="0" cellspacing="0">
+                            <tr>
+                              <td style="background:#fff;border:1.5px solid ${accent};border-radius:10px;">
+                                <a href="${rescheduleUrl}" style="display:inline-block;padding:13px 22px;color:${accent};font-size:14px;font-weight:600;text-decoration:none;letter-spacing:-0.1px;white-space:nowrap;">
+                                  Reschedule →
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
                         <td>
                           <table cellpadding="0" cellspacing="0">
                             <tr>

@@ -47,6 +47,12 @@ const T = {
     errEmailInvalid: "Invalid email address",
     doneTitle: "You're booked!",
     doneSub: (name, date) => `Looking forward to meeting with you, ${name} on ${date}.`,
+    rescheduleBanner: "You're updating your appointment",
+    rescheduleSub: "Pick a new date and time, then confirm your details below.",
+    confirmReschedule: "Update appointment",
+    rescheduling: "Updating…",
+    doneTitleReschedule: "Appointment updated!",
+    doneSubReschedule: (name, date) => `Your appointment has been rescheduled, ${name}. New date: ${date}.`,
     appointmentSummary: "Appointment Summary",
     labelDate: "Date",
     labelTime: "Time",
@@ -98,6 +104,12 @@ const T = {
     confirmBooking: "אשר הזמנה",
     confirming: "שולח…",
     secureNote: "המידע שלך מאובטח ולא משותף",
+    rescheduleBanner: "אתה מעדכן את הפגישה שלך",
+    rescheduleSub: "בחר תאריך ושעה חדשים, ולאחר מכן אשר את הפרטים שלך.",
+    confirmReschedule: "עדכן פגישה",
+    rescheduling: "מעדכן…",
+    doneTitleReschedule: "הפגישה עודכנה!",
+    doneSubReschedule: (name, date) => `הפגישה שלך נקבעה מחדש, ${name}. תאריך חדש: ${date}.`,
     errName: "אנא הכנס שם",
     errEmail: "אנא הכנס כתובת אימייל",
     errEmailInvalid: "כתובת אימייל לא תקינה",
@@ -171,6 +183,8 @@ const STEPS = ["pick", "details", "done"];
 export default function App() {
   const [lang, setLang] = useState("en");
   const t = T[lang];
+
+  const [rescheduleEventId] = useState(() => new URLSearchParams(window.location.search).get('reschedule') || null);
 
   const [availability, setAvailability] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -247,10 +261,14 @@ export default function App() {
     if (Object.keys(errs).length) { setFormErrors(errs); return; }
     setSubmitting(true);
     try {
-      const resp = await fetch("/api/book", {
+      const url = rescheduleEventId ? "/api/reschedule" : "/api/book";
+      const body = rescheduleEventId
+        ? { eventId: rescheduleEventId, name: form.name, email: form.email, notes: form.notes, start: selectedSlot.start, end: selectedSlot.end }
+        : { name: form.name, email: form.email, notes: form.notes, start: selectedSlot.start, end: selectedSlot.end };
+      const resp = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: form.name, email: form.email, notes: form.notes, start: selectedSlot.start, end: selectedSlot.end }),
+        body: JSON.stringify(body),
       });
       const data = await resp.json();
       if (!data.success) throw new Error(data.error || "Booking failed");
@@ -548,6 +566,17 @@ export default function App() {
             {/* DETAILS */}
             {step === "details" && (
               <div className="anim">
+                {rescheduleEventId && (
+                  <div style={{ background: hexToRgba(CONFIG.ACCENT, 0.08), borderBottom: `1px solid ${hexToRgba(CONFIG.ACCENT, 0.15)}`, padding: "14px 28px", display: "flex", alignItems: "flex-start", gap: 12 }}>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ flexShrink: 0, marginTop: 2 }}>
+                      <path d="M9 1.5A7.5 7.5 0 1 1 1.5 9 7.5 7.5 0 0 1 9 1.5zm0 3.75v4.5M9 12.75h.008" stroke={CONFIG.ACCENT} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <div>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: CONFIG.ACCENT, marginBottom: 2 }}>{t.rescheduleBanner}</p>
+                      <p style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{t.rescheduleSub}</p>
+                    </div>
+                  </div>
+                )}
                 <div style={s.cardHeader} className="ch">
                   <button className="btn-back" style={s.btnBack} onClick={() => goTo("pick")}>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -626,9 +655,9 @@ export default function App() {
                     {submitting ? (
                       <span style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
                         <span style={s.btnSpinner} />
-                        {t.confirming}
+                        {rescheduleEventId ? t.rescheduling : t.confirming}
                       </span>
-                    ) : t.confirmBooking}
+                    ) : (rescheduleEventId ? t.confirmReschedule : t.confirmBooking)}
                   </button>
                   <p style={s.secureNote}>
                     <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
@@ -651,9 +680,9 @@ export default function App() {
                     </svg>
                   </div>
                 </div>
-                <h2 style={s.doneTitle}>{t.doneTitle}</h2>
+                <h2 style={s.doneTitle}>{rescheduleEventId ? t.doneTitleReschedule : t.doneTitle}</h2>
                 <p style={s.doneSub}>
-                  {t.doneSub(form.name, fmtDate(selectedDate, t.locale))}
+                  {rescheduleEventId ? t.doneSubReschedule(form.name, fmtDate(selectedDate, t.locale)) : t.doneSub(form.name, fmtDate(selectedDate, t.locale))}
                 </p>
 
                 <div style={s.confirmCard}>
