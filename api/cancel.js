@@ -19,6 +19,8 @@ const sharedStyles = `
   .details-val { font-size: 14px; color: ${accent}; font-weight: 600; text-align: right; max-width: 60%; }
   .btn-cancel { display: block; width: 100%; padding: 14px; background: #DC2626; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; margin-bottom: 12px; }
   .btn-cancel:hover { background: #B91C1C; }
+  .btn-reschedule { display: block; width: 100%; padding: 14px; background: transparent; color: ${accent}; border: 1.5px solid ${accent}; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; text-decoration: none; text-align: center; margin-bottom: 12px; }
+  .btn-reschedule:hover { background: #EEF2FF; }
   .btn-keep { display: block; width: 100%; padding: 14px; background: transparent; color: #374151; border: 1.5px solid #E5E7EB; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; text-decoration: none; text-align: center; }
   .btn-keep:hover { background: #F9FAFB; }
 `;
@@ -28,10 +30,11 @@ function fmtEvent(event) {
   const end = new Date(event.end?.dateTime || event.end?.date);
   const dateStr = start.toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   const timeStr = `${start.toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false })} – ${end.toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false })}`;
-  // Extract client name from description
   const nameMatch = event.description?.match(/^Client: (.+)/m);
   const clientName = nameMatch?.[1] || (event.attendees?.[0]?.displayName) || '';
-  return { dateStr, timeStr, clientName };
+  const rescheduleMatch = event.description?.match(/^Reschedule: (.+)/m);
+  const rescheduleUrl = rescheduleMatch?.[1]?.trim() || null;
+  return { dateStr, timeStr, clientName, rescheduleUrl };
 }
 
 function detailsHtml(dateStr, timeStr, clientName) {
@@ -102,7 +105,7 @@ export default async function handler(req, res) {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       const event = evResp.ok ? await evResp.json() : null;
-      const { dateStr, timeStr, clientName } = event ? fmtEvent(event) : { dateStr: '', timeStr: '', clientName: '' };
+      const { dateStr, timeStr, clientName, rescheduleUrl } = event ? fmtEvent(event) : { dateStr: '', timeStr: '', clientName: '', rescheduleUrl: null };
       const keepUrl = `/api/cancel?eventId=${eventId}&keep=1`;
 
       res.setHeader('Content-Type', 'text/html');
@@ -129,6 +132,7 @@ export default async function handler(req, res) {
       <form method="POST" action="/api/cancel?eventId=${eventId}">
         <button type="submit" class="btn-cancel">Yes, cancel my appointment</button>
       </form>
+      ${rescheduleUrl ? `<a href="${rescheduleUrl}" class="btn-reschedule">Reschedule instead →</a>` : ''}
       <a href="${keepUrl}" class="btn-keep">No, keep my appointment</a>
     </div>
   </div>
