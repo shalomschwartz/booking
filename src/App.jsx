@@ -899,7 +899,7 @@ const globalStyles = `
 `;
 
 const s = {
-  page: { minHeight: "100vh", background: "#fff", fontFamily: "'Inter', sans-serif" },
+  page: { minHeight: "100vh", background: "#ECEEF1", fontFamily: "'Inter', sans-serif" },
   nav: { position: "sticky", top: 0, zIndex: 100, background: "rgba(255,255,255,0.9)", backdropFilter: "blur(16px)", borderBottom: "1px solid #E5E7EB" },
   navInner: { maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" },
   navLogo: { width: 32, height: 32, borderRadius: 8, background: CONFIG.ACCENT, display: "flex", alignItems: "center", justifyContent: "center" },
