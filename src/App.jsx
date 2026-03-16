@@ -657,46 +657,53 @@ export default function App() {
                   </div>
                   <div style={{ ...s.field, gridColumn: "1 / -1" }}>
                     <label style={s.label}>{t.labelMeetingType}</label>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      {/* Google Meet button */}
-                      <button
-                        type="button"
-                        onClick={() => setForm(f => ({ ...f, meetingType: "google_meet" }))}
-                        style={{
-                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                          padding: "11px 16px", borderRadius: 10,
-                          border: `1.5px solid ${form.meetingType === "google_meet" ? CONFIG.ACCENT : "#E5E7EB"}`,
-                          background: form.meetingType === "google_meet" ? CONFIG.ACCENT : "#F9FAFB",
-                          color: form.meetingType === "google_meet" ? "#fff" : "#374151",
-                          fontWeight: 600, fontSize: 14, cursor: "pointer", transition: "all 0.15s",
-                        }}
-                      >
-                        {/* Google Meet icon */}
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                          <path d="M15 10.5v3l4-3v7l-4-3v3a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h9a1 1 0 011 1v3.5z" fill={form.meetingType === "google_meet" ? "#fff" : "#00897B"}/>
-                        </svg>
-                        {t.meetGoogle}
-                      </button>
-                      {/* Zoom button */}
-                      <button
-                        type="button"
-                        onClick={() => setForm(f => ({ ...f, meetingType: "zoom" }))}
-                        style={{
-                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                          padding: "11px 16px", borderRadius: 10,
-                          border: `1.5px solid ${form.meetingType === "zoom" ? "#2D8CFF" : "#E5E7EB"}`,
-                          background: form.meetingType === "zoom" ? "#2D8CFF" : "#F9FAFB",
-                          color: form.meetingType === "zoom" ? "#fff" : "#374151",
-                          fontWeight: 600, fontSize: 14, cursor: "pointer", transition: "all 0.15s",
-                        }}
-                      >
-                        {/* Zoom camera icon */}
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                          <rect x="2" y="6" width="13" height="12" rx="2" fill={form.meetingType === "zoom" ? "#fff" : "#2D8CFF"}/>
-                          <path d="M15 10l5-3v10l-5-3v-4z" fill={form.meetingType === "zoom" ? "#fff" : "#2D8CFF"}/>
-                        </svg>
-                        {t.meetZoom}
-                      </button>
+                    <div style={{ display: "flex", background: "#F3F4F6", borderRadius: 12, padding: 4, gap: 4 }}>
+                      {[
+                        {
+                          id: "google_meet",
+                          label: t.meetGoogle,
+                          iconColor: "#00897B",
+                          icon: (active) => (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                              <path d="M15 10.5v3l4-3v7l-4-3v3a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h9a1 1 0 011 1v3.5z" fill={active ? "#00897B" : "#9CA3AF"}/>
+                            </svg>
+                          ),
+                        },
+                        {
+                          id: "zoom",
+                          label: t.meetZoom,
+                          iconColor: "#2D8CFF",
+                          icon: (active) => (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                              <rect x="2" y="6" width="13" height="12" rx="2" fill={active ? "#2D8CFF" : "#9CA3AF"}/>
+                              <path d="M15 10l5-3v10l-5-3v-4z" fill={active ? "#2D8CFF" : "#9CA3AF"}/>
+                            </svg>
+                          ),
+                        },
+                      ].map(({ id, label, iconColor, icon }) => {
+                        const active = form.meetingType === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => setForm(f => ({ ...f, meetingType: id }))}
+                            style={{
+                              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                              padding: "10px 16px", borderRadius: 9, border: "none",
+                              background: active ? "#fff" : "transparent",
+                              color: active ? "#111827" : "#9CA3AF",
+                              fontWeight: active ? 600 : 500,
+                              fontSize: 14, cursor: "pointer",
+                              boxShadow: active ? "0 1px 4px rgba(0,0,0,0.10)" : "none",
+                              transition: "all 0.15s",
+                              fontFamily: "'Inter', sans-serif",
+                            }}
+                          >
+                            {icon(active)}
+                            {label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
