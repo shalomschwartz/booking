@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { eventId, name, email, notes, start, end } = req.body;
+    const { eventId, name, email, notes, start, end, meetingType } = req.body;
     if (!eventId || !start || !end) return res.status(400).json({ error: 'Missing required fields' });
 
     const accessToken = await getAccessToken();
@@ -28,6 +28,13 @@ export default async function handler(req, res) {
     const resolvedName = name || '';
     const rescheduleUrl = `${proto}://${host}?reschedule=${eventId}&name=${encodeURIComponent(resolvedName)}&email=${encodeURIComponent(resolvedEmail)}`;
 
+    const useZoom = meetingType === 'zoom';
+    let zoomLink = null;
+    if (useZoom) {
+      const duration = Math.round((new Date(end) - new Date(start)) / 60000);
+      zoomLink = await createZoomMeeting({ topic: `Meeting consultation with ${resolvedName}`, start, duration, timezone: TIMEZONE });
+    }
+
     // Patch the event with new time (and optionally updated name/notes)
     const updatedDescription = [
       `Client: ${resolvedName}`,
@@ -44,6 +51,7 @@ export default async function handler(req, res) {
       end: { dateTime: end, timeZone: TIMEZONE },
       summary: resolvedName ? `Meeting consultation with ${resolvedName}` : existing.summary,
       description: updatedDescription,
+      ...(useZoom ? { location: zoomLink } : {}),
     };
     if (email) {
       patch.attendees = [{ email, displayName: name || '' }];
@@ -195,6 +203,37 @@ async function sendRescheduleEmail({ name, email, notes, start, end, calendarLin
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ raw: encoded }),
   });
+}
+
+async function getZoomAccessToken() {
+  const { ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET } = process.env;
+  const credentials = Buffer.from(`${ZOOM_CLIENT_ID}:${ZOOM_CLIENT_SECRET}`).toString('base64');
+  const resp = await fetch(`https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${ZOOM_ACCOUNT_ID}`, {
+    method: 'POST',
+    headers: { Authorization: `Basic ${credentials}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+  });
+  const data = await resp.json();
+  if (!data.access_token) throw new Error('Failed to get Zoom access token');
+  return data.access_token;
+}
+
+async function createZoomMeeting({ topic, start, duration, timezone }) {
+  const token = await getZoomAccessToken();
+  const resp = await fetch('https://api.zoom.us/v2/users/me/meetings', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      topic,
+      type: 2,
+      start_time: new Date(start).toISOString().replace('.000', ''),
+      duration,
+      timezone,
+      settings: { host_video: true, participant_video: true, join_before_host: true },
+    }),
+  });
+  const data = await resp.json();
+  if (!data.join_url) throw new Error('Failed to create Zoom meeting');
+  return data.join_url;
 }
 
 async function getAccessToken() {

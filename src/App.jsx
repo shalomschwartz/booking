@@ -66,6 +66,9 @@ const T = {
     errorSub: "Please contact us directly to book an appointment.",
     min: "min",
     somethingWrong: "Something went wrong, please try again.",
+    labelMeetingType: "Meeting type",
+    meetGoogle: "Google Meet",
+    meetZoom: "Zoom",
     morning: "Morning",
     afternoon: "Afternoon",
     evening: "Evening",
@@ -128,6 +131,9 @@ const T = {
     errorSub: "אנא צור איתנו קשר ישירות לקביעת פגישה.",
     min: "דק׳",
     somethingWrong: "משהו השתבש, אנא נסה שוב.",
+    labelMeetingType: "סוג פגישה",
+    meetGoogle: "Google Meet",
+    meetZoom: "Zoom",
     morning: "בוקר",
     afternoon: "צהריים",
     evening: "ערב",
@@ -195,9 +201,9 @@ export default function App() {
   const [form, setForm] = useState(() => {
     if (rescheduleEventId) {
       const p = new URLSearchParams(window.location.search);
-      return { name: p.get('name') || '', email: p.get('email') || '', notes: '' };
+      return { name: p.get('name') || '', email: p.get('email') || '', notes: '', meetingType: 'google_meet' };
     }
-    return { name: '', email: '', notes: '' };
+    return { name: '', email: '', notes: '', meetingType: 'google_meet' };
   });
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -269,8 +275,8 @@ export default function App() {
     try {
       const url = rescheduleEventId ? "/api/reschedule" : "/api/book";
       const body = rescheduleEventId
-        ? { eventId: rescheduleEventId, name: form.name, email: form.email, notes: form.notes, start: selectedSlot.start, end: selectedSlot.end }
-        : { name: form.name, email: form.email, notes: form.notes, start: selectedSlot.start, end: selectedSlot.end };
+        ? { eventId: rescheduleEventId, name: form.name, email: form.email, notes: form.notes, start: selectedSlot.start, end: selectedSlot.end, meetingType: form.meetingType }
+        : { name: form.name, email: form.email, notes: form.notes, start: selectedSlot.start, end: selectedSlot.end, meetingType: form.meetingType };
       const resp = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -649,6 +655,32 @@ export default function App() {
                       onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))}
                     />
                   </div>
+                  <div style={{ ...s.field, gridColumn: "1 / -1" }}>
+                    <label style={s.label}>{t.labelMeetingType}</label>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {["google_meet", "zoom"].map(type => (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => setForm(f => ({ ...f, meetingType: type }))}
+                          style={{
+                            flex: 1,
+                            padding: "10px 16px",
+                            borderRadius: 8,
+                            border: `1.5px solid ${form.meetingType === type ? CONFIG.ACCENT : "#E5E7EB"}`,
+                            background: form.meetingType === type ? hexToRgba(CONFIG.ACCENT, 0.08) : "#fff",
+                            color: form.meetingType === type ? CONFIG.ACCENT : "#374151",
+                            fontWeight: 600,
+                            fontSize: 14,
+                            cursor: "pointer",
+                            transition: "all 0.15s",
+                          }}
+                        >
+                          {type === "google_meet" ? t.meetGoogle : t.meetZoom}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div style={s.cardFooter} className="cf">
@@ -714,7 +746,7 @@ export default function App() {
                 <button
                   className="btn-ghost-dark"
                   style={s.btnGhostDark}
-                  onClick={() => { setStep("pick"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "" }); setBooking(null); }}
+                  onClick={() => { setStep("pick"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "", meetingType: "google_meet" }); setBooking(null); }}
                 >
                   {t.scheduleAnother}
                 </button>
