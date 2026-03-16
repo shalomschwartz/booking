@@ -21,16 +21,28 @@ export default async function handler(req, res) {
     if (!existingResp.ok) return res.status(404).json({ error: 'Event not found' });
     const existing = await existingResp.json();
 
+    const host = req.headers['x-forwarded-host'] || req.headers.host || '';
+    const proto = host.includes('localhost') ? 'http' : 'https';
+    const cancelUrl = `${proto}://${host}/api/cancel?eventId=${eventId}`;
+    const resolvedEmail = email || existing.attendees?.[0]?.email || '';
+    const resolvedName = name || '';
+    const rescheduleUrl = `${proto}://${host}?reschedule=${eventId}&name=${encodeURIComponent(resolvedName)}&email=${encodeURIComponent(resolvedEmail)}`;
+
     // Patch the event with new time (and optionally updated name/notes)
+    const updatedDescription = [
+      `Client: ${resolvedName}`,
+      `Email: ${resolvedEmail}`,
+      notes ? `Notes: ${notes}` : null,
+      '',
+      `Reschedule: ${rescheduleUrl}`,
+      `Cancel: ${cancelUrl}`,
+    ].filter(v => v !== null).join('\n');
+
     const patch = {
       start: { dateTime: start, timeZone: TIMEZONE },
       end: { dateTime: end, timeZone: TIMEZONE },
-      summary: name ? `Meeting consultation with ${name}` : existing.summary,
-      description: [
-        `Client: ${name || ''}`,
-        `Email: ${email || ''}`,
-        notes ? `Notes: ${notes}` : null,
-      ].filter(Boolean).join('\n'),
+      summary: resolvedName ? `Meeting consultation with ${resolvedName}` : existing.summary,
+      description: updatedDescription,
     };
     if (email) {
       patch.attendees = [{ email, displayName: name || '' }];
@@ -50,14 +62,10 @@ export default async function handler(req, res) {
 
     // Send updated confirmation email
     const calendarLink = updated.htmlLink || null;
-    const host = req.headers['x-forwarded-host'] || req.headers.host || '';
-    const proto = host.includes('localhost') ? 'http' : 'https';
-    const cancelUrl = `${proto}://${host}/api/cancel?eventId=${eventId}`;
-    const rescheduleUrl = `${proto}://${host}?reschedule=${eventId}`;
 
     await sendRescheduleEmail({
-      name: name || '',
-      email: email || existing.attendees?.[0]?.email || '',
+      name: resolvedName,
+      email: resolvedEmail,
       notes,
       start,
       end,
