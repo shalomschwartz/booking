@@ -658,27 +658,45 @@ export default function App() {
                   <div style={{ ...s.field, gridColumn: "1 / -1" }}>
                     <label style={s.label}>{t.labelMeetingType}</label>
                     <div style={{ display: "flex", gap: 8 }}>
-                      {["google_meet", "zoom"].map(type => (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() => setForm(f => ({ ...f, meetingType: type }))}
-                          style={{
-                            flex: 1,
-                            padding: "10px 16px",
-                            borderRadius: 8,
-                            border: `1.5px solid ${form.meetingType === type ? CONFIG.ACCENT : "#E5E7EB"}`,
-                            background: form.meetingType === type ? hexToRgba(CONFIG.ACCENT, 0.08) : "#fff",
-                            color: form.meetingType === type ? CONFIG.ACCENT : "#374151",
-                            fontWeight: 600,
-                            fontSize: 14,
-                            cursor: "pointer",
-                            transition: "all 0.15s",
-                          }}
-                        >
-                          {type === "google_meet" ? t.meetGoogle : t.meetZoom}
-                        </button>
-                      ))}
+                      {/* Google Meet button */}
+                      <button
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, meetingType: "google_meet" }))}
+                        style={{
+                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                          padding: "11px 16px", borderRadius: 10,
+                          border: `1.5px solid ${form.meetingType === "google_meet" ? CONFIG.ACCENT : "#E5E7EB"}`,
+                          background: form.meetingType === "google_meet" ? CONFIG.ACCENT : "#F9FAFB",
+                          color: form.meetingType === "google_meet" ? "#fff" : "#374151",
+                          fontWeight: 600, fontSize: 14, cursor: "pointer", transition: "all 0.15s",
+                        }}
+                      >
+                        {/* Google Meet icon */}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                          <path d="M15 10.5v3l4-3v7l-4-3v3a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h9a1 1 0 011 1v3.5z" fill={form.meetingType === "google_meet" ? "#fff" : "#00897B"}/>
+                        </svg>
+                        {t.meetGoogle}
+                      </button>
+                      {/* Zoom button */}
+                      <button
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, meetingType: "zoom" }))}
+                        style={{
+                          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                          padding: "11px 16px", borderRadius: 10,
+                          border: `1.5px solid ${form.meetingType === "zoom" ? "#2D8CFF" : "#E5E7EB"}`,
+                          background: form.meetingType === "zoom" ? "#2D8CFF" : "#F9FAFB",
+                          color: form.meetingType === "zoom" ? "#fff" : "#374151",
+                          fontWeight: 600, fontSize: 14, cursor: "pointer", transition: "all 0.15s",
+                        }}
+                      >
+                        {/* Zoom camera icon */}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                          <rect x="2" y="6" width="13" height="12" rx="2" fill={form.meetingType === "zoom" ? "#fff" : "#2D8CFF"}/>
+                          <path d="M15 10l5-3v10l-5-3v-4z" fill={form.meetingType === "zoom" ? "#fff" : "#2D8CFF"}/>
+                        </svg>
+                        {t.meetZoom}
+                      </button>
                     </div>
                   </div>
                 </div>
