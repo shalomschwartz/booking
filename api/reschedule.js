@@ -23,10 +23,8 @@ export default async function handler(req, res) {
 
     const host = req.headers['x-forwarded-host'] || req.headers.host || '';
     const proto = host.includes('localhost') ? 'http' : 'https';
-    const cancelUrl = `${proto}://${host}/api/cancel?eventId=${eventId}`;
     const resolvedEmail = email || existing.attendees?.[0]?.email || '';
     const resolvedName = name || '';
-    const rescheduleUrl = `${proto}://${host}?reschedule=${eventId}&name=${encodeURIComponent(resolvedName)}&email=${encodeURIComponent(resolvedEmail)}`;
 
     const useZoom = meetingType === 'zoom';
     let zoomLink = null;
@@ -35,55 +33,98 @@ export default async function handler(req, res) {
       zoomLink = await createZoomMeeting({ topic: `Meeting consultation with ${resolvedName}`, start, duration, timezone: TIMEZONE });
     }
 
-    // Patch the event with new time (and optionally updated name/notes)
-    const updatedDescription = [
-      `Client: ${resolvedName}`,
-      `Email: ${resolvedEmail}`,
-      notes ? `Notes: ${notes}` : null,
-      '',
-      `Reschedule: ${rescheduleUrl}`,
-      '',
-      `Cancel: ${cancelUrl}`,
-    ].filter(v => v !== null).join('\n');
+    // Google Meet conferenceData cannot be removed via PATCH or PUT once created.
+    // When switching to Zoom, delete the old event and create a fresh one without conferenceData.
+    let finalEventId = eventId;
+    let calendarLink = null;
 
-    // When switching to Zoom we must use PUT (full replace) to strip the Google Meet conferenceData.
-    // PATCH cannot remove existing conferenceData even with conferenceDataVersion=1.
-    let updateResp;
-    if (useZoom) {
-      const putBody = {
-        ...existing,
+    if (useZoom && existing.conferenceData) {
+      // Delete old event (silently — new one will send the invite)
+      await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventId}?sendUpdates=none`,
+        { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      // cancelUrl / rescheduleUrl will be built after we know the new eventId — create event first
+      const placeholderEvent = {
+        summary: resolvedName ? `Meeting consultation with ${resolvedName}` : existing.summary,
+        description: '',
         start: { dateTime: start, timeZone: TIMEZONE },
         end: { dateTime: end, timeZone: TIMEZONE },
-        summary: resolvedName ? `Meeting consultation with ${resolvedName}` : existing.summary,
-        description: updatedDescription,
+        attendees: resolvedEmail ? [{ email: resolvedEmail, displayName: resolvedName }] : [],
         location: zoomLink,
-        attendees: email ? [{ email, displayName: name || '' }] : (existing.attendees || []),
+        reminders: existing.reminders || { useDefault: true },
       };
-      delete putBody.conferenceData;
-      updateResp = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventId}?sendUpdates=all`,
+      const createResp = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?sendUpdates=all`,
         {
-          method: 'PUT',
+          method: 'POST',
           headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify(putBody),
+          body: JSON.stringify(placeholderEvent),
         }
       );
+      if (!createResp.ok) return res.status(500).json({ error: 'Failed to create replacement event' });
+      const created = await createResp.json();
+      finalEventId = created.id;
+      calendarLink = created.htmlLink || null;
+
+      // Patch description with correct cancel/reschedule URLs using new event ID
+      const cancelUrl = `${proto}://${host}/api/cancel?eventId=${finalEventId}`;
+      const rescheduleUrl = `${proto}://${host}?reschedule=${finalEventId}&name=${encodeURIComponent(resolvedName)}&email=${encodeURIComponent(resolvedEmail)}`;
+      const updatedDescription = [
+        `Client: ${resolvedName}`,
+        `Email: ${resolvedEmail}`,
+        notes ? `Notes: ${notes}` : null,
+        '',
+        `Reschedule: ${rescheduleUrl}`,
+        '',
+        `Cancel: ${cancelUrl}`,
+      ].filter(v => v !== null).join('\n');
+      await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${finalEventId}?sendUpdates=none`,
+        {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: updatedDescription }),
+        }
+      );
+
+      await sendRescheduleEmail({
+        name: resolvedName, email: resolvedEmail, notes, start, end,
+        calendarLink, cancelUrl, rescheduleUrl,
+        slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'),
+        businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions',
+      });
     } else {
+      const cancelUrl = `${proto}://${host}/api/cancel?eventId=${eventId}`;
+      const rescheduleUrl = `${proto}://${host}?reschedule=${eventId}&name=${encodeURIComponent(resolvedName)}&email=${encodeURIComponent(resolvedEmail)}`;
+      const updatedDescription = [
+        `Client: ${resolvedName}`,
+        `Email: ${resolvedEmail}`,
+        notes ? `Notes: ${notes}` : null,
+        '',
+        `Reschedule: ${rescheduleUrl}`,
+        '',
+        `Cancel: ${cancelUrl}`,
+      ].filter(v => v !== null).join('\n');
+
       const patch = {
         start: { dateTime: start, timeZone: TIMEZONE },
         end: { dateTime: end, timeZone: TIMEZONE },
         summary: resolvedName ? `Meeting consultation with ${resolvedName}` : existing.summary,
         description: updatedDescription,
-        location: '',
-        conferenceData: {
-          createRequest: {
-            requestId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-            conferenceSolutionKey: { type: 'hangoutsMeet' },
+        location: useZoom ? zoomLink : '',
+        ...(useZoom ? {} : {
+          conferenceData: {
+            createRequest: {
+              requestId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+              conferenceSolutionKey: { type: 'hangoutsMeet' },
+            },
           },
-        },
+        }),
         ...(email ? { attendees: [{ email, displayName: name || '' }] } : {}),
       };
-      updateResp = await fetch(
+      const updateResp = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventId}?sendUpdates=all&conferenceDataVersion=1`,
         {
           method: 'PATCH',
@@ -91,28 +132,19 @@ export default async function handler(req, res) {
           body: JSON.stringify(patch),
         }
       );
+      if (!updateResp.ok) return res.status(500).json({ error: 'Failed to update event' });
+      const updated = await updateResp.json();
+      calendarLink = updated.htmlLink || null;
+
+      await sendRescheduleEmail({
+        name: resolvedName, email: resolvedEmail, notes, start, end,
+        calendarLink, cancelUrl, rescheduleUrl,
+        slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'),
+        businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions',
+      });
     }
 
-    if (!updateResp.ok) return res.status(500).json({ error: 'Failed to update event' });
-    const updated = await updateResp.json();
-
-    // Send updated confirmation email
-    const calendarLink = updated.htmlLink || null;
-
-    await sendRescheduleEmail({
-      name: resolvedName,
-      email: resolvedEmail,
-      notes,
-      start,
-      end,
-      calendarLink,
-      cancelUrl,
-      rescheduleUrl,
-      slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'),
-      businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions',
-    });
-
-    return res.status(200).json({ success: true, eventId });
+    return res.status(200).json({ success: true, eventId: finalEventId });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: err.message });
