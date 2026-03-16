@@ -77,7 +77,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function sendConfirmationEmail({ name, email, notes, start, end, calendarLink, cancelUrl, slotDuration, businessName }) {
+async function sendConfirmationEmail({ name, email, notes, start, end, calendarLink, cancelUrl, rescheduleUrl, slotDuration, businessName }) {
   const tz = process.env.TIMEZONE || 'Asia/Jerusalem';
   const accent = '#4F46E5';
   const startDate = new Date(start);
