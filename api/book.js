@@ -78,7 +78,7 @@ export default async function handler(req, res) {
       `Reschedule: ${rescheduleUrl}`,
       `Cancel: ${cancelUrl}`,
     ].filter(v => v !== null).join('\n');
-    await fetch(
+    const patchResp = await fetch(
       `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${created.id}?sendUpdates=none`,
       {
         method: 'PATCH',
@@ -86,6 +86,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({ description: updatedDescription }),
       }
     );
+    if (!patchResp.ok) console.error('PATCH description failed:', await patchResp.text());
 
     await sendConfirmationEmail({ name, email, notes, start, end, calendarLink, cancelUrl, rescheduleUrl, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
 
