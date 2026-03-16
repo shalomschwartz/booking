@@ -65,6 +65,8 @@ export default async function handler(req, res) {
     const freebusyData = await freebusyResp.json();
     const busy = freebusyData.calendars?.[CALENDAR_ID]?.busy || [];
 
+    const now = new Date();
+
     // Compute available slots per day from the single busy response
     for (const dateStr of workingDates) {
       const startUTC = toUTC(dateStr, WORK_START);
@@ -76,6 +78,8 @@ export default async function handler(req, res) {
       while (cur < endUTC) {
         const slotEnd = new Date(cur.getTime() + SLOT_DURATION * 60000);
         if (slotEnd > endUTC) break;
+        // Skip slots that have already started (for today)
+        if (dateStr === todayStr && cur <= now) { cur = slotEnd; continue; }
         const isBusy = busy.some(b => new Date(b.start) < slotEnd && new Date(b.end) > cur);
         if (!isBusy) daySlots.push({ start: cur.toISOString(), end: slotEnd.toISOString() });
         cur = slotEnd;
