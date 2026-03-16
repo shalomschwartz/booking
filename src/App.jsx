@@ -661,14 +661,14 @@ export default function App() {
                   </div>
                   <div style={{ ...s.field, gridColumn: "1 / -1" }}>
                     <label style={s.label}>{t.labelMeetingType}</label>
-                    <div style={{ display: "flex", background: "#F3F4F6", borderRadius: 12, padding: 4, gap: 4 }}>
+                    <div style={{ display: "flex", gap: 10 }}>
                       {[
                         {
                           id: "google_meet",
                           label: t.meetGoogle,
-                          iconColor: "#00897B",
+                          color: "#00897B",
                           icon: (active) => (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                               <path d="M15 10.5v3l4-3v7l-4-3v3a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h9a1 1 0 011 1v3.5z" fill={active ? "#00897B" : "#9CA3AF"}/>
                             </svg>
                           ),
@@ -676,30 +676,30 @@ export default function App() {
                         {
                           id: "zoom",
                           label: t.meetZoom,
-                          iconColor: "#2D8CFF",
+                          color: "#2D8CFF",
                           icon: (active) => (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                               <rect x="2" y="6" width="13" height="12" rx="2" fill={active ? "#2D8CFF" : "#9CA3AF"}/>
                               <path d="M15 10l5-3v10l-5-3v-4z" fill={active ? "#2D8CFF" : "#9CA3AF"}/>
                             </svg>
                           ),
                         },
-                      ].map(({ id, label, iconColor, icon }) => {
+                      ].map(({ id, label, color, icon }) => {
                         const active = form.meetingType === id;
+                        const none = !form.meetingType;
                         return (
                           <button
                             key={id}
                             type="button"
                             onClick={() => { setForm(f => ({ ...f, meetingType: id })); setFormErrors(fe => ({ ...fe, meetingType: undefined })); }}
                             style={{
-                              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-                              padding: "10px 16px", borderRadius: 9, border: "none",
-                              background: active ? "#fff" : "transparent",
-                              color: active ? "#111827" : "#9CA3AF",
+                              flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8,
+                              padding: "16px 12px", borderRadius: 12, cursor: "pointer",
+                              border: active ? `2px solid ${color}` : `2px dashed ${none ? "#D1D5DB" : "#E5E7EB"}`,
+                              background: active ? `${color}0F` : "#fff",
+                              color: active ? color : "#6B7280",
                               fontWeight: active ? 600 : 500,
-                              fontSize: 14, cursor: "pointer",
-                              boxShadow: active ? "0 1px 4px rgba(0,0,0,0.10)" : "none",
-                              transition: "all 0.15s",
+                              fontSize: 14, transition: "all 0.15s",
                               fontFamily: "'Inter', sans-serif",
                             }}
                           >
