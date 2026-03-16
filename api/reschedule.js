@@ -51,14 +51,27 @@ export default async function handler(req, res) {
       end: { dateTime: end, timeZone: TIMEZONE },
       summary: resolvedName ? `Meeting consultation with ${resolvedName}` : existing.summary,
       description: updatedDescription,
-      ...(useZoom ? { location: zoomLink } : {}),
+      ...(useZoom
+        ? {
+            location: zoomLink,
+            conferenceData: {},   // clears existing Google Meet
+          }
+        : {
+            location: '',
+            conferenceData: {
+              createRequest: {
+                requestId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                conferenceSolutionKey: { type: 'hangoutsMeet' },
+              },
+            },
+          }),
     };
     if (email) {
       patch.attendees = [{ email, displayName: name || '' }];
     }
 
     const updateResp = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventId}?sendUpdates=all`,
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventId}?sendUpdates=all${useZoom ? '' : '&conferenceDataVersion=1'}`,
       {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
