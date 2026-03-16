@@ -192,7 +192,13 @@ export default function App() {
   const [step, setStep] = useState("pick");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [form, setForm] = useState({ name: "", email: "", notes: "" });
+  const [form, setForm] = useState(() => {
+    if (rescheduleEventId) {
+      const p = new URLSearchParams(window.location.search);
+      return { name: p.get('name') || '', email: p.get('email') || '', notes: '' };
+    }
+    return { name: '', email: '', notes: '' };
+  });
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [animating, setAnimating] = useState(false);

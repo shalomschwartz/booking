@@ -67,7 +67,26 @@ export default async function handler(req, res) {
     const host = req.headers['x-forwarded-host'] || req.headers.host || '';
     const proto = host.includes('localhost') ? 'http' : 'https';
     const cancelUrl = `${proto}://${host}/api/cancel?eventId=${created.id}`;
-    const rescheduleUrl = `${proto}://${host}?reschedule=${created.id}`;
+    const rescheduleUrl = `${proto}://${host}?reschedule=${created.id}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+
+    // Patch event description to include action links (visible in calendar invite)
+    const updatedDescription = [
+      `Client: ${name}`,
+      `Email: ${email}`,
+      notes ? `Notes: ${notes}` : null,
+      '',
+      `Reschedule: ${rescheduleUrl}`,
+      `Cancel: ${cancelUrl}`,
+    ].filter(v => v !== null).join('\n');
+    await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${created.id}?sendUpdates=none`,
+      {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: updatedDescription }),
+      }
+    );
+
     await sendConfirmationEmail({ name, email, notes, start, end, calendarLink, cancelUrl, rescheduleUrl, slotDuration: parseInt(process.env.SLOT_DURATION_MINS || '30'), businessName: process.env.BUSINESS_NAME || 'Shalom AI Solutions' });
 
     return res.status(200).json({ success: true, eventId: created.id, meetLink });
