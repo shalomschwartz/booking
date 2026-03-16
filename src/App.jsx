@@ -45,6 +45,7 @@ const T = {
     errName: "Please enter your name",
     errEmail: "Please enter your email",
     errEmailInvalid: "Invalid email address",
+    errMeetingType: "Please select a meeting type",
     doneTitle: "You're booked!",
     doneSub: (name, date) => `Looking forward to meeting with you, ${name} on ${date}.`,
     rescheduleBanner: "You're updating your appointment",
@@ -69,6 +70,7 @@ const T = {
     labelMeetingType: "Meeting type",
     meetGoogle: "Google Meet",
     meetZoom: "Zoom",
+    errMeetingType: "Please select a meeting type",
     morning: "Morning",
     afternoon: "Afternoon",
     evening: "Evening",
@@ -116,6 +118,7 @@ const T = {
     errName: "אנא הכנס שם",
     errEmail: "אנא הכנס כתובת אימייל",
     errEmailInvalid: "כתובת אימייל לא תקינה",
+    errMeetingType: "אנא בחר סוג פגישה",
     doneTitle: "!נקבע תור",
     doneSub: (name, date) => `מצפים לפגישה איתך, ${name}, בתאריך ${date}.`,
     appointmentSummary: "סיכום הפגישה",
@@ -201,9 +204,9 @@ export default function App() {
   const [form, setForm] = useState(() => {
     if (rescheduleEventId) {
       const p = new URLSearchParams(window.location.search);
-      return { name: p.get('name') || '', email: p.get('email') || '', notes: '', meetingType: 'google_meet' };
+      return { name: p.get('name') || '', email: p.get('email') || '', notes: '', meetingType: '' };
     }
-    return { name: '', email: '', notes: '', meetingType: 'google_meet' };
+    return { name: '', email: '', notes: '', meetingType: '' };
   });
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -265,6 +268,7 @@ export default function App() {
     if (!form.name.trim()) errs.name = t.errName;
     if (!form.email.trim()) errs.email = t.errEmail;
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = t.errEmailInvalid;
+    if (!form.meetingType) errs.meetingType = t.errMeetingType;
     return errs;
   };
 
@@ -686,7 +690,7 @@ export default function App() {
                           <button
                             key={id}
                             type="button"
-                            onClick={() => setForm(f => ({ ...f, meetingType: id }))}
+                            onClick={() => { setForm(f => ({ ...f, meetingType: id })); setFormErrors(fe => ({ ...fe, meetingType: undefined })); }}
                             style={{
                               flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
                               padding: "10px 16px", borderRadius: 9, border: "none",
@@ -705,6 +709,7 @@ export default function App() {
                         );
                       })}
                     </div>
+                    {formErrors.meetingType && <p style={s.errMsg}>{formErrors.meetingType}</p>}
                   </div>
                 </div>
 
@@ -771,7 +776,7 @@ export default function App() {
                 <button
                   className="btn-ghost-dark"
                   style={s.btnGhostDark}
-                  onClick={() => { setStep("pick"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "", meetingType: "google_meet" }); setBooking(null); }}
+                  onClick={() => { setStep("pick"); setSelectedDate(null); setSelectedSlot(null); setForm({ name: "", email: "", notes: "", meetingType: "" }); setBooking(null); }}
                 >
                   {t.scheduleAnother}
                 </button>
