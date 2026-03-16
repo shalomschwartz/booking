@@ -46,38 +46,52 @@ export default async function handler(req, res) {
       `Cancel: ${cancelUrl}`,
     ].filter(v => v !== null).join('\n');
 
-    const patch = {
-      start: { dateTime: start, timeZone: TIMEZONE },
-      end: { dateTime: end, timeZone: TIMEZONE },
-      summary: resolvedName ? `Meeting consultation with ${resolvedName}` : existing.summary,
-      description: updatedDescription,
-      ...(useZoom
-        ? {
-            location: zoomLink,
-            conferenceData: {},   // clears existing Google Meet
-          }
-        : {
-            location: '',
-            conferenceData: {
-              createRequest: {
-                requestId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-                conferenceSolutionKey: { type: 'hangoutsMeet' },
-              },
-            },
-          }),
-    };
-    if (email) {
-      patch.attendees = [{ email, displayName: name || '' }];
+    // When switching to Zoom we must use PUT (full replace) to strip the Google Meet conferenceData.
+    // PATCH cannot remove existing conferenceData even with conferenceDataVersion=1.
+    let updateResp;
+    if (useZoom) {
+      const putBody = {
+        ...existing,
+        start: { dateTime: start, timeZone: TIMEZONE },
+        end: { dateTime: end, timeZone: TIMEZONE },
+        summary: resolvedName ? `Meeting consultation with ${resolvedName}` : existing.summary,
+        description: updatedDescription,
+        location: zoomLink,
+        attendees: email ? [{ email, displayName: name || '' }] : (existing.attendees || []),
+      };
+      delete putBody.conferenceData;
+      updateResp = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventId}?sendUpdates=all`,
+        {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(putBody),
+        }
+      );
+    } else {
+      const patch = {
+        start: { dateTime: start, timeZone: TIMEZONE },
+        end: { dateTime: end, timeZone: TIMEZONE },
+        summary: resolvedName ? `Meeting consultation with ${resolvedName}` : existing.summary,
+        description: updatedDescription,
+        location: '',
+        conferenceData: {
+          createRequest: {
+            requestId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            conferenceSolutionKey: { type: 'hangoutsMeet' },
+          },
+        },
+        ...(email ? { attendees: [{ email, displayName: name || '' }] } : {}),
+      };
+      updateResp = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventId}?sendUpdates=all&conferenceDataVersion=1`,
+        {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(patch),
+        }
+      );
     }
-
-    const updateResp = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventId}?sendUpdates=all&conferenceDataVersion=1`,
-      {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(patch),
-      }
-    );
 
     if (!updateResp.ok) return res.status(500).json({ error: 'Failed to update event' });
     const updated = await updateResp.json();
