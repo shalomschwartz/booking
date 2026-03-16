@@ -76,6 +76,7 @@ export default async function handler(req, res) {
       notes ? `Notes: ${notes}` : null,
       '',
       `Reschedule: ${rescheduleUrl}`,
+      '',
       `Cancel: ${cancelUrl}`,
     ].filter(v => v !== null).join('\n');
     const patchResp = await fetch(
