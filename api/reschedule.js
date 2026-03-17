@@ -224,6 +224,11 @@ async function sendRescheduleEmail({ name, email, notes, start, end, calendarLin
                       <a href="${calendarLink}" style="display:inline-block;padding:13px 22px;color:#fff;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;">View in Calendar →</a>
                     </td>
                   </tr></table></td>` : ''}
+                  <td style="padding-right:8px;"><table cellpadding="0" cellspacing="0"><tr>
+                    <td style="background:#fff;border:1.5px solid ${accent};border-radius:10px;">
+                      <a href="${rescheduleUrl}" style="display:inline-block;padding:13px 22px;color:${accent};font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;">Reschedule again</a>
+                    </td>
+                  </tr></table></td>
                   <td><table cellpadding="0" cellspacing="0"><tr>
                     <td style="background:#fff;border:1.5px solid #E5E7EB;border-radius:10px;">
                       <a href="${cancelUrl}" style="display:inline-block;padding:13px 22px;color:#DC2626;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;">Cancel appointment</a>
