@@ -45,7 +45,6 @@ const T = {
     errName: "Please enter your name",
     errEmail: "Please enter your email",
     errEmailInvalid: "Invalid email address",
-    errMeetingType: "Please select a meeting type",
     doneTitle: "You're booked!",
     doneSub: (name, date) => `Looking forward to meeting with you, ${name} on ${date}.`,
     rescheduleBanner: "You're updating your appointment",
