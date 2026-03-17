@@ -51,7 +51,10 @@ export default async function handler(req, res) {
         description: '',
         start: { dateTime: start, timeZone: TIMEZONE },
         end: { dateTime: end, timeZone: TIMEZONE },
-        attendees: resolvedEmail ? [{ email: resolvedEmail, displayName: resolvedName }] : [],
+        attendees: [
+          ...(resolvedEmail ? [{ email: resolvedEmail, displayName: resolvedName }] : []),
+          ...(process.env.ORGANIZER_EMAIL ? [{ email: process.env.ORGANIZER_EMAIL, responseStatus: 'accepted' }] : []),
+        ],
         location: zoomLink,
         reminders: existing.reminders || { useDefault: true },
       };
@@ -122,7 +125,10 @@ export default async function handler(req, res) {
             },
           },
         }),
-        ...(email ? { attendees: [{ email, displayName: name || '' }] } : {}),
+        attendees: [
+          ...(email ? [{ email, displayName: name || '' }] : []),
+          ...(process.env.ORGANIZER_EMAIL ? [{ email: process.env.ORGANIZER_EMAIL, responseStatus: 'accepted' }] : []),
+        ],
       };
       const updateResp = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventId}?sendUpdates=all&conferenceDataVersion=1`,

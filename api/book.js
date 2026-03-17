@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       description: [`Client: ${name}`, `Email: ${email}`, notes ? `Notes: ${notes}` : null].filter(Boolean).join('\n'),
       start: { dateTime: start, timeZone: TIMEZONE },
       end: { dateTime: end, timeZone: TIMEZONE },
-      attendees: [{ email, displayName: name }],
+      attendees: [{ email, displayName: name }, ...(process.env.ORGANIZER_EMAIL ? [{ email: process.env.ORGANIZER_EMAIL, responseStatus: 'accepted' }] : [])],
       ...(useZoom
         ? { location: zoomLink }
         : {
